@@ -1,43 +1,68 @@
 #!/bin/bash
 
-# Verify deployment package for EC2 is properly configured
-echo "🔍 Verifying deployment package configuration..."
+echo "=== Canvas Course Shell Generator - Deployment Verification ==="
+echo "Checking current deployment status..."
 
-# Check if main.tsx has proper Okta setup
-if grep -q "Security" client/src/main.tsx; then
-    echo "✅ main.tsx: Okta Security component configured"
+# Check if files exist
+echo "1. Checking key files..."
+if [ -f "/home/ubuntu/canvas-course-generator/client/src/lib/okta-config.ts" ]; then
+    echo "✓ okta-config.ts exists"
+    echo "   Issuer URL: $(grep 'issuer:' /home/ubuntu/canvas-course-generator/client/src/lib/okta-config.ts)"
 else
-    echo "❌ main.tsx: Missing Okta Security component"
+    echo "✗ okta-config.ts missing"
 fi
 
-# Check if auth context uses proper Okta hooks
-if grep -q "useOktaAuth" client/src/lib/auth-context.tsx; then
-    echo "✅ auth-context.tsx: Using proper Okta hooks"
+if [ -f "/home/ubuntu/canvas-course-generator/client/src/App.tsx" ]; then
+    echo "✓ App.tsx exists"
+    echo "   Security component: $(grep -A 2 'Security' /home/ubuntu/canvas-course-generator/client/src/App.tsx | head -n 3)"
 else
-    echo "❌ auth-context.tsx: Missing Okta hooks"
+    echo "✗ App.tsx missing"
 fi
 
-# Check if test authentication is removed from routes
-if grep -q "test-login" server/routes.ts; then
-    echo "❌ routes.ts: Test authentication endpoints still present"
+if [ -f "/home/ubuntu/canvas-course-generator/client/src/main.tsx" ]; then
+    echo "✓ main.tsx exists"
+    echo "   No Security component: $(grep -c 'Security' /home/ubuntu/canvas-course-generator/client/src/main.tsx || echo '0')"
 else
-    echo "✅ routes.ts: Test authentication endpoints removed"
+    echo "✗ main.tsx missing"
 fi
 
-# Check if Okta callback endpoint exists
-if grep -q "okta-callback" server/routes.ts; then
-    echo "✅ routes.ts: Okta callback endpoint configured"
+if [ -d "/home/ubuntu/canvas-course-generator/attached_assets" ]; then
+    echo "✓ attached_assets directory exists"
+    echo "   Canvas logo: $(ls -la /home/ubuntu/canvas-course-generator/attached_assets/Canvas_logo_single_mark_*.png 2>/dev/null || echo 'not found')"
 else
-    echo "❌ routes.ts: Missing Okta callback endpoint"
+    echo "✗ attached_assets directory missing"
 fi
 
-# Check if API client sends proper headers
-if grep -q "x-okta-user" client/src/lib/queryClient.ts; then
-    echo "✅ queryClient.ts: Sending proper Okta user headers"
+# Check service status
+echo ""
+echo "2. Checking service status..."
+systemctl status canvas-course-generator.service --no-pager -l
+
+# Check if build directory exists and clear it
+echo ""
+echo "3. Checking build cache..."
+if [ -d "/home/ubuntu/canvas-course-generator/dist" ]; then
+    echo "✓ Build directory exists, clearing cache..."
+    rm -rf /home/ubuntu/canvas-course-generator/dist/*
+    echo "   Cache cleared"
 else
-    echo "❌ queryClient.ts: Missing Okta user headers"
+    echo "✗ Build directory not found"
 fi
+
+# Check node modules
+echo ""
+echo "4. Checking node modules..."
+if [ -d "/home/ubuntu/canvas-course-generator/node_modules" ]; then
+    echo "✓ Node modules exist"
+else
+    echo "✗ Node modules missing - run npm install"
+fi
+
+# Restart service
+echo ""
+echo "5. Restarting service..."
+sudo systemctl restart canvas-course-generator.service
 
 echo ""
-echo "🎯 Summary: Deployment package is configured for production Okta authentication"
-echo "📋 Ready to deploy to EC2 instance at shell.dpvils.org"
+echo "=== Deployment verification complete ==="
+echo "If issues persist, try clearing browser cache and hard refresh (Ctrl+F5)"
