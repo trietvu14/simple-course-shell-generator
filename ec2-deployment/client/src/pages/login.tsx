@@ -2,7 +2,7 @@ import { useOktaAuth } from '@okta/okta-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { BookOpen } from "lucide-react";
+import canvasLogo from "@assets/Canvas_logo_single_mark_1752601762771.png";
 
 export default function Login() {
   const { oktaAuth, authState } = useOktaAuth();
@@ -29,9 +29,11 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-orange-600 rounded-lg p-3">
-              <BookOpen className="h-10 w-10 text-white" />
-            </div>
+            <img 
+              src={canvasLogo} 
+              alt="Canvas Logo" 
+              className="h-16 w-auto"
+            />
           </div>
           <CardTitle>Canvas Course Shell Generator</CardTitle>
           <CardDescription>
