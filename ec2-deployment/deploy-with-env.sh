@@ -95,6 +95,15 @@ else
     echo "   Update your .env file and run: npm run db:push"
 fi
 
+# Build the React application for production
+echo "🏗️  Building React application for production..."
+if npm run build; then
+    echo "✅ React application built successfully"
+    echo "   Static files available in: /home/ubuntu/canvas-course-generator/dist/"
+else
+    echo "⚠️  React build failed - will run in development mode"
+fi
+
 # Start the service
 sudo systemctl start canvas-course-generator
 
