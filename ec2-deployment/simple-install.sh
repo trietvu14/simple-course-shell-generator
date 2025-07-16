@@ -25,7 +25,7 @@ npm install
 npm run db:push
 
 # Make start script executable
-chmod +x start-production.js
+chmod +x start-production.cjs
 
 # Create systemd service file
 sudo tee /etc/systemd/system/canvas-course-generator.service << 'EOF'
@@ -37,7 +37,7 @@ After=network.target
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/canvas-course-generator
-ExecStart=/usr/bin/node start-production.js
+ExecStart=/usr/bin/node start-production.cjs
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
