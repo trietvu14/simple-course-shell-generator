@@ -1,0 +1,16 @@
+Jul 16 03:58:11 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 03:58:11 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]: node:internal/modules/esm/resolve:215
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:   const resolvedOption = FSLegacyMainResolve(packageJsonUrlString, packageConfig>Jul 16 03:58:11 ip-172-31-31-157 node[4654]:                          ^
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]: Error: Cannot find package '/home/ubuntu/course-shell-generator/node_modules/exp>Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at legacyMainResolve (node:internal/modules/esm/resolve:215:26)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at packageResolve (node:internal/modules/esm/resolve:860:14)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at moduleResolve (node:internal/modules/esm/resolve:946:18)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:642:12)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at #cachedDefaultResolve (node:internal/modules/esm/loader:591:25)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at ModuleLoader.resolve (node:internal/modules/esm/loader:574:38)
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:236:>Jul 16 03:58:11 ip-172-31-31-157 node[4654]:     at ModuleJob._link (node:internal/modules/esm/module_job:130:49) {
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]:   code: 'ERR_MODULE_NOT_FOUND'
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]: }
+Jul 16 03:58:11 ip-172-31-31-157 node[4654]: Node.js v20.19.3
+Jul 16 03:58:11 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited, status=1/FAIL>Jul 16 03:58:11 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.

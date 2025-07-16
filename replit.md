@@ -1,0 +1,130 @@
+# Canvas Course Shell Generator
+
+## Overview
+
+This is a full-stack web application for creating Canvas course shells through an automated system. The application provides a user-friendly interface for educational administrators to bulk-create course shells in Canvas LMS by selecting organizational accounts and defining course parameters.
+
+## Recent Changes
+
+**July 16, 2025**
+- **DEPLOYMENT FIX**: Fixed critical database migration issue in deployment process
+- Database tables were not being created during deployment, causing 500 errors
+- Added database migration step to deployment/setup-systemd.sh script
+- Created deployment/create-db-tables.sql for manual table creation
+- Updated DEPLOYMENT.md to include database migration requirements
+- **LESSON LEARNED**: Database migration must be part of deployment process, not optional
+
+**July 15, 2025**
+- Updated header to use official Canvas logo instead of graduation cap icon
+- Implemented automatic form reset after successful course shell creation
+- Added comprehensive recursive account fetching to display all 56 nested accounts
+- Fixed account hierarchy display with proper indentation and level indicators
+- **MAJOR UPDATE**: Implemented full Okta authentication integration
+- **PRODUCTION READY**: Added complete AWS EC2 deployment configuration
+- Created comprehensive deployment scripts, health checks, and monitoring setup
+- **DATABASE UPDATE**: Migrated from Neon serverless to PostgreSQL for EC2 deployment
+- **PROCESS MANAGEMENT**: Replaced PM2 with systemd service for better reliability
+- **DEPLOYMENT SCRIPTS**: Created automated systemd setup and service management
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React with TypeScript
+- **Build Tool**: Vite for fast development and optimized production builds
+- **UI Library**: Radix UI components with shadcn/ui styling system
+- **Styling**: Tailwind CSS with custom CSS variables for theming
+- **State Management**: TanStack Query (React Query) for server state management
+- **Routing**: Wouter for lightweight client-side routing
+- **Forms**: React Hook Form with Zod validation
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ES modules
+- **Database**: PostgreSQL with Drizzle ORM
+- **Database Provider**: Neon serverless PostgreSQL
+- **Session Management**: Express sessions with PostgreSQL store
+- **API Integration**: Canvas LMS REST API integration
+
+### Database Schema
+- **Users**: Stores user information with Okta integration
+- **Canvas Accounts**: Caches Canvas account hierarchy
+- **Course Shells**: Tracks course shell creation requests and status
+- **Creation Batches**: Groups course shell creation operations for progress tracking
+
+## Key Components
+
+### Authentication System
+- **Okta Integration**: Full Single Sign-On authentication with Digital Promise Okta
+- **Session Management**: Okta-managed authentication with automatic token refresh
+- **User Storage**: Database-backed user management with Okta ID mapping
+
+### Canvas Integration
+- **Account Management**: Fetches and caches Canvas account hierarchy
+- **Course Creation**: Batch creation of course shells via Canvas API
+- **Progress Tracking**: Real-time status updates for bulk operations
+
+### User Interface
+- **Dashboard**: Main interface for course shell management
+- **Account Selection**: Hierarchical account picker with search functionality
+- **Course Shell Form**: Dynamic form for defining multiple course shells
+- **Progress Modal**: Real-time progress tracking for batch operations
+- **Recent Activity**: Historical view of previous course creation batches
+
+### Real-time Features
+- **Progress Polling**: Frontend polls backend for batch creation status
+- **Live Updates**: Real-time status updates during course creation
+- **Error Handling**: Comprehensive error tracking and user feedback
+
+## Data Flow
+
+1. **User Authentication**: Users authenticate via mock system (Okta integration planned)
+2. **Account Loading**: System fetches Canvas account hierarchy on dashboard load
+3. **Course Shell Definition**: Users select target accounts and define course parameters
+4. **Batch Creation**: System creates batch record and initiates Canvas API calls
+5. **Progress Tracking**: Frontend polls for updates while backend processes requests
+6. **Completion Handling**: System updates status and provides completion feedback
+
+## External Dependencies
+
+### Canvas LMS Integration
+- **Canvas API**: REST API for account management and course creation
+- **Authentication**: Bearer token authentication with Canvas
+- **Rate Limiting**: Handles Canvas API rate limits during bulk operations
+
+### Database Services
+- **Neon PostgreSQL**: Serverless PostgreSQL hosting
+- **Connection Pooling**: Efficient database connection management
+- **Migration System**: Drizzle Kit for database schema management
+
+### Development Tools
+- **Vite Plugins**: Development error overlay and Replit integration
+- **TypeScript**: Full type safety across frontend and backend
+- **ESBuild**: Fast production builds for server code
+
+## Deployment Strategy
+
+### Development Environment
+- **Hot Module Replacement**: Vite HMR for fast development iteration
+- **TypeScript Compilation**: Real-time type checking
+- **Database Development**: Local development with production-like database
+
+### Production Deployment (AWS EC2)
+- **Frontend**: Vite builds static assets served by Nginx
+- **Backend**: ESBuild bundles server code managed by PM2
+- **Database**: PostgreSQL with automated backups
+- **SSL/TLS**: Let's Encrypt certificates with auto-renewal
+- **Process Management**: PM2 cluster mode for high availability
+- **Reverse Proxy**: Nginx with security headers and caching
+- **Monitoring**: Health checks, logging, and performance metrics
+- **Deployment**: Automated deployment scripts with rollback capability
+
+### Replit Integration
+- **Development Banner**: Replit development environment integration
+- **Cartographer Plugin**: Enhanced development experience on Replit
+- **Runtime Error Handling**: Enhanced error reporting for development
+
+The application follows a modern full-stack architecture with clear separation of concerns, comprehensive error handling, and real-time user feedback. The system is designed to handle bulk operations efficiently while providing a smooth user experience for educational administrators.

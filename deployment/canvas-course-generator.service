@@ -1,0 +1,29 @@
+[Unit]
+Description=Canvas Course Shell Generator
+After=network.target
+After=postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/course-shell-generator
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment=NODE_ENV=production
+Environment=PORT=5000
+Environment=DATABASE_URL=postgresql://postgres:DPVils25!@localhost:5432/canvas_course_generator
+Environment=CANVAS_API_URL=https://dppowerfullearning.instructure.com/api/v1
+Environment=CANVAS_API_TOKEN=28098~rvMvz2ZRQyCXPrQPHeREnyvZhcuM22yKF8Bh3vKYJUkmQhTkwfKTRMm7UTWDe7mG
+Environment=PGHOST=localhost
+Environment=PGPORT=5432
+Environment=PGUSER=postgres
+Environment=PGPASSWORD=DPVils25!
+Environment=PGDATABASE=canvas_course_generator
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+Jul 16 04:12:22 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 04:12:33 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart counter is at 16.Jul 16 04:12:33 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 04:12:33 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]: [dotenv@17.2.0] injecting env (12) from .env (tip: � encrypt with dotenvx: http> Jul 16 04:12:33 ip-172-31-31-157 node[5215]: file:///home/ubuntu/course-shell-generator/dist/index.js:715
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]: var app = express2();
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]:           ^
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]: ReferenceError: express2 is not defined
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]:     at file:///home/ubuntu/course-shell-generator/dist/index.js:715:11
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Jul 16 04:12:33 ip-172-31-31-157 node[5215]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117>Jul 16 04:12:33 ip-172-31-31-157 node[5215]: Node.js v20.19.3
+Jul 16 04:12:33 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited, status=1/FAIL>Jul 16 04:12:33 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 04:12:38 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 04:12:38 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 04:12:38 ip-172-31-31-157 node[5230]: [dotenv@17.2.0] injecting env (12) from .env (tip: ⚙️  write to custom object wit>
+Jul 16 04:12:38 ip-172-31-31-157 node[5230]: 4:12:38 AM [express] serving on port 5000
