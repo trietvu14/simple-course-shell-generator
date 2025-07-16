@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Installing React Canvas Course Shell Generator on EC2..."
+echo "Installing Canvas Course Shell Generator on EC2..."
 
 # Stop existing service
 sudo systemctl stop canvas-course-generator 2>/dev/null || true
@@ -21,14 +21,14 @@ cp -r * /home/ubuntu/canvas-course-generator/
 cd /home/ubuntu/canvas-course-generator
 npm install
 
-# Ensure Okta dependencies are installed
-npm install @okta/okta-react @okta/okta-auth-js
-
 # Update database schema
 npm run db:push
 
+# Make start script executable
+chmod +x start-production.js
+
 # Create systemd service file
-cat > canvas-course-generator.service << 'SYSTEMD_EOF'
+sudo tee /etc/systemd/system/canvas-course-generator.service << 'EOF'
 [Unit]
 Description=Canvas Course Shell Generator (React)
 After=network.target
@@ -44,10 +44,9 @@ Environment=NODE_ENV=production
 
 [Install]
 WantedBy=multi-user.target
-SYSTEMD_EOF
+EOF
 
 # Install and start service
-sudo mv canvas-course-generator.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable canvas-course-generator
 sudo systemctl start canvas-course-generator

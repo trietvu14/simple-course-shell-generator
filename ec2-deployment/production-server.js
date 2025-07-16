@@ -1,9 +1,11 @@
-const express = require('express');
-const path = require('path');
-const { spawn } = require('child_process');
+import express from 'express';
+import path from 'path';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // Load environment variables
-require('dotenv').config();
+import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
