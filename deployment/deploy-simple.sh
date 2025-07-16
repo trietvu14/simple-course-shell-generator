@@ -53,7 +53,7 @@ Environment=SESSION_SECRET=your-secret-key-change-this
 Environment=OKTA_CLIENT_ID=your-okta-client-id
 Environment=OKTA_CLIENT_SECRET=your-okta-client-secret
 Environment=OKTA_ISSUER=https://digitalpromise.okta.com/oauth2/default
-Environment=OKTA_REDIRECT_URI=http://YOUR_EC2_IP:5000/callback
+Environment=OKTA_REDIRECT_URI=https://shell.dpvils.org/callback
 
 [Install]
 WantedBy=multi-user.target
