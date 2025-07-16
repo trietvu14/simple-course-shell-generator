@@ -150,58 +150,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Okta callback endpoint - handles user registration/login
-  app.post('/api/auth/okta-callback', async (req: Request, res: Response) => {
+  // Simple authentication endpoints
+  app.post('/api/auth/simple-login', async (req: Request, res: Response) => {
     try {
-      const { oktaId, email, firstName, lastName } = req.body;
+      const { username, password } = req.body;
       
-      if (!oktaId) {
-        return res.status(400).json({ message: 'Okta ID is required' });
+      if (username === 'admin' && password === 'P@ssword01') {
+        // Create or update user in database
+        const user = await storage.upsertUser({
+          oktaId: 'admin',
+          email: 'admin@digitalpromise.org',
+          firstName: 'Admin',
+          lastName: 'User'
+        });
+        
+        // Create session token
+        const sessionToken = nanoid();
+        await storage.createUserSession({
+          userId: user.id,
+          sessionToken: sessionToken,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        });
+        
+        res.json({
+          success: true,
+          token: sessionToken,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
       }
-      
-      // Create or update user in database
-      const user = await storage.upsertUser({
-        oktaId,
-        email: email || `${oktaId}@digitalpromise.org`,
-        firstName: firstName || 'Unknown',
-        lastName: lastName || 'User'
-      });
-      
-      res.json(user);
     } catch (error) {
-      console.error("Error in Okta callback:", error);
-      res.status(500).json({ message: "Failed to process Okta callback" });
+      console.error("Error in simple login:", error);
+      res.status(500).json({ message: "Login failed" });
     }
   });
 
-  // Authentication middleware - requires Okta user in localStorage
-  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const oktaUserHeader = req.headers['x-okta-user'] as string;
+  // Get current user endpoint
+  app.get('/api/auth/user', async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
     
-    if (!oktaUserHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    try {
+      const session = await storage.getUserSessionByToken(token);
+      
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+      }
+      
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ message: 'Failed to get user' });
+    }
+  });
+
+  // Authentication middleware - requires Bearer token
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Authentication required' });
     }
     
+    const token = authHeader.substring(7);
+    
     try {
-      const oktaUser = JSON.parse(oktaUserHeader);
-      const oktaId = oktaUser.sub;
+      const session = await storage.getUserSessionByToken(token);
       
-      if (!oktaId) {
-        return res.status(401).json({ message: 'Invalid authentication token' });
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
       }
       
-      let user = await storage.getUserByOktaId(oktaId);
+      const user = await storage.getUser(session.userId);
       
-      // If user doesn't exist, create from Okta info
       if (!user) {
-        const newUser = {
-          oktaId: oktaId,
-          email: oktaUser.email || `${oktaId}@digitalpromise.org`,
-          firstName: oktaUser.given_name || 'Unknown',
-          lastName: oktaUser.family_name || 'User'
-        };
-        user = await storage.upsertUser(newUser);
-        console.log('Created new user from Okta:', user);
+        return res.status(401).json({ message: 'User not found' });
       }
       
       (req as AuthenticatedRequest).user = user;

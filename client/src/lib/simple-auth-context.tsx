@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { SimpleUser, getSimpleUser } from './simple-auth';
+import { SimpleUser } from './simple-auth';
 
 interface SimpleAuthContextType {
   user: SimpleUser | null;
@@ -17,25 +17,58 @@ export function SimpleAuthProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     // Check for existing session
-    const storedUser = localStorage.getItem('simple-auth-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('simple-auth-token');
+    if (storedToken) {
+      // Verify token with backend
+      fetch('/api/auth/user', {
+        headers: {
+          'Authorization': `Bearer ${storedToken}`
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Token invalid');
+      })
+      .then(userData => {
+        setUser(userData);
+      })
+      .catch(() => {
+        // Token is invalid, remove it
+        localStorage.removeItem('simple-auth-token');
+        localStorage.removeItem('simple-auth-user');
+      });
     }
     setIsLoading(false);
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    if (username === "admin" && password === "P@ssword01") {
-      const simpleUser = getSimpleUser();
-      setUser(simpleUser);
-      localStorage.setItem('simple-auth-user', JSON.stringify(simpleUser));
-      return true;
+    try {
+      const response = await fetch('/api/auth/simple-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('simple-auth-token', data.token);
+        localStorage.setItem('simple-auth-user', JSON.stringify(data.user));
+        return true;
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
     }
     return false;
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('simple-auth-token');
     localStorage.removeItem('simple-auth-user');
   };
 

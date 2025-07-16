@@ -22,5 +22,6 @@ export function getSimpleUser(): SimpleUser {
 }
 
 export function isSimpleAuthEnabled(): boolean {
-  return import.meta.env.VITE_SIMPLE_AUTH === "true";
+  // Force simple auth for production deployment
+  return true;
 }
