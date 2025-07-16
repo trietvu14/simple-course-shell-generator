@@ -5,7 +5,8 @@ echo "Deploying simple authentication version to EC2..."
 
 # Set variables
 APP_DIR="/home/ubuntu/canvas-course-generator"
-REPO_DIR="$(pwd)"
+CURRENT_DIR="$(pwd)"
+REPO_DIR="$(dirname "$CURRENT_DIR")"
 
 # Stop the service if it exists
 echo "1. Stopping existing service..."
@@ -17,7 +18,7 @@ if [ -d "$APP_DIR" ]; then
     sudo mv "$APP_DIR" "$APP_DIR.backup.$(date +%Y%m%d-%H%M%S)"
 fi
 
-# Copy the entire repository
+# Copy the entire repository (parent directory)
 echo "3. Copying application files..."
 sudo cp -r "$REPO_DIR" "$APP_DIR"
 
@@ -31,7 +32,7 @@ echo "5. Installing dependencies..."
 cd "$APP_DIR"
 npm install
 
-# Copy production files
+# Copy production files from ec2-production subdirectory
 echo "6. Setting up production configuration..."
 cp ec2-production/.env .env
 cp ec2-production/start-production.cjs start-production.cjs
@@ -53,7 +54,8 @@ sudo systemctl status canvas-course-generator.service --no-pager -l
 
 # Setup nginx configuration
 echo "10. Setting up nginx configuration..."
-cd ec2-production
+cd "$APP_DIR/ec2-production"
+chmod +x setup-nginx.sh
 ./setup-nginx.sh
 
 echo ""

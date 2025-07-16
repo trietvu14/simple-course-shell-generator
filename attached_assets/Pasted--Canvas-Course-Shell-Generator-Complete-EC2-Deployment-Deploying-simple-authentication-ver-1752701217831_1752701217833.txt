@@ -1,0 +1,64 @@
+=== Canvas Course Shell Generator - Complete EC2 Deployment ===
+Deploying simple authentication version to EC2...
+1. Stopping existing service...
+2. Creating backup...
+3. Copying application files...
+cp: cannot stat '/home/ubuntu/canvas-course-generator/ec2-production': No such file or directory
+4. Setting permissions...
+chown: cannot access '/home/ubuntu/canvas-course-generator': No such file or directory
+chmod: cannot access '/home/ubuntu/canvas-course-generator': No such file or directory
+5. Installing dependencies...
+deploy-complete.sh: line 31: cd: /home/ubuntu/canvas-course-generator: No such file or directory
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+
+added 539 packages, and audited 540 packages in 21s
+
+73 packages are looking for funding
+  run `npm fund` for details
+
+9 vulnerabilities (1 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+6. Setting up production configuration...
+cp: cannot stat 'ec2-production/.env': No such file or directory
+cp: cannot stat 'ec2-production/start-production.cjs': No such file or directory
+cp: cannot stat 'ec2-production/canvas-course-generator.service': No such file or directory
+7. Configuring systemd service...
+8. Starting service...
+Job for canvas-course-generator.service failed because of unavailable resources or another system error.
+See "systemctl status canvas-course-generator.service" and "journalctl -xeu canvas-course-generator.service" for details.
+9. Checking service status...
+● canvas-course-generator.service - Canvas Course Shell Generator (React)
+     Loaded: loaded (/etc/systemd/system/canvas-course-generator.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: resources) since Wed 2025-07-16 21:24:49 UTC; 5s ago
+        CPU: 0
+
+Jul 16 21:24:49 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No such file or directory
+Jul 16 21:24:49 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 21:24:49 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator (React).
+10. Setting up nginx configuration...
+deploy-complete.sh: line 56: cd: ec2-production: No such file or directory
+deploy-complete.sh: line 57: ./setup-nginx.sh: Permission denied
+
+=== Deployment Complete ===
+✓ Simple authentication enabled (admin / P@ssword01)
+✓ Canvas API integration ready
+✓ Service running on port 5000
+✓ Database connection configured
+✓ Nginx proxy configured
+
+Access the application at: https://shell.dpvils.org
+Login with: admin / P@ssword01
+
+Useful commands:
+• Check app logs: sudo journalctl -u canvas-course-generator.service -f
+• Restart app: sudo systemctl restart canvas-course-generator.service
+• Check nginx: sudo systemctl status nginx
+• Nginx logs: sudo tail -f /var/log/nginx/error.log

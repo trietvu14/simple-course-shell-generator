@@ -1,0 +1,11 @@
+Jul 16 21:26:52 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 21:26:52 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator (React).
+Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart counter is at 1>Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator (React).
+Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files: No such file>Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No such file or di>Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 21:27:02 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator (React).
+Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart counter is at 1>Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator (React).
+Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files: No such file>Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No such file or di>Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 21:27:12 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator (React).
+Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart counter is at 1>Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator (React).
+Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files: No such file>Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No such file or di>Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 21:27:23 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator (React).

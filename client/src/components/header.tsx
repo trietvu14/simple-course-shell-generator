@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
+import { useSimpleAuth } from "@/lib/simple-auth-context";
+import { isSimpleAuthEnabled } from "@/lib/simple-auth";
 import { LogOut } from "lucide-react";
 import canvasLogo from "@assets/Canvas_logo_single_mark_1752601762771.png";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const authContext = isSimpleAuthEnabled() ? useSimpleAuth() : useAuth();
+  const { user, logout } = authContext;
 
   if (!user) {
     return null;
@@ -42,7 +45,14 @@ export default function Header() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={logout}
+              onClick={() => {
+                if (isSimpleAuthEnabled()) {
+                  logout();
+                  window.location.href = "/";
+                } else {
+                  logout();
+                }
+              }}
               className="text-neutral-600 hover:text-neutral-800"
             >
               <LogOut size={16} />

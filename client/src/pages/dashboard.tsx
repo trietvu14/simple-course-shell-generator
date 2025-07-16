@@ -7,13 +7,15 @@ import ProgressModal from "@/components/progress-modal";
 import RecentActivity from "@/components/recent-activity";
 
 import { useAuth } from "@/lib/auth-context";
+import { useSimpleAuth } from "@/lib/simple-auth-context";
+import { isSimpleAuthEnabled } from "@/lib/simple-auth";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [progressBatchId, setProgressBatchId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user } = isSimpleAuthEnabled() ? useSimpleAuth() : useAuth();
 
   const handleProgressStart = (batchId: string) => {
     setProgressBatchId(batchId);
