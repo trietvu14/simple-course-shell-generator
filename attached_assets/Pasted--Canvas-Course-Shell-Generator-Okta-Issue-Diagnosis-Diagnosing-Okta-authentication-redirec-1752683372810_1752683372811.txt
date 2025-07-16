@@ -1,0 +1,112 @@
+=== Canvas Course Shell Generator - Okta Issue Diagnosis ===
+Diagnosing Okta authentication redirect issue...
+1. Checking current file contents...
+--- Current okta-config.ts ---
+import { OktaAuth } from '@okta/okta-auth-js';
+
+const oktaConfig = {
+  issuer: 'https://digitalpromise.okta.com/oauth2/default',
+  clientId: '0oapma7d718cb4oYu5d7',
+  redirectUri: `${window.location.origin}/callback`,
+  scopes: ['openid', 'profile', 'email'],
+  pkce: true,
+  restoreOriginalUri: async (oktaAuth: OktaAuth, originalUri: string) => {
+    window.location.replace(originalUri || '/dashboard');
+  },
+};
+
+export const oktaAuth = new OktaAuth(oktaConfig);
+--- Current App.tsx (Security component) ---
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Security } from '@okta/okta-react';
+import { oktaAuth } from './lib/okta-config';
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import Dashboard from "@/pages/dashboard";
+import Login from "@/pages/login";
+import Callback from "@/pages/callback";
+import NotFound from "@/pages/not-found";
+import TestAuth from "@/components/test-auth";
+
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, isLoading } = useAuth();
+--
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Security
+        oktaAuth={oktaAuth}
+        restoreOriginalUri={async (oktaAuth, originalUri) => {
+          window.location.replace(originalUri || '/dashboard');
+        }}
+      >
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </Security>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
+
+--- Current main.tsx ---
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(<App />);
+
+2. Checking environment variables...
+OKTA_CLIENT_ID=0oapma7d718cb4oYu5d7
+OKTA_CLIENT_SECRET=Ez5CUFKEF2-MdAthRXS6EteDzs8sO28iUMDhHyFETDtIaVt1XufExidViy8uGGRz
+OKTA_ISSUER=https://digitalpromise.okta.com/oauth2/default
+OKTA_REDIRECT_URI=https://shell.dpvils.org/callback
+
+3. Checking service status...
+     Memory: 197.0M
+        CPU: 7.300s
+     CGroup: /system.slice/canvas-course-generator.service
+             ├─5148 /usr/bin/node start-production.cjs
+             ├─5156 "npm run dev" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+             ├─5167 sh -c "NODE_ENV=development tsx server/index.ts"
+             ├─5168 node /home/ubuntu/canvas-course-generator/node_modules/.bin/tsx server/index.ts
+             ├─5179 /usr/bin/node --require /home/ubuntu/canvas-course-generator/node_modules/tsx/dist/preflight.cjs --import file:///home/ubuntu/canvas-course-generator/node_modules/tsx/dist/loader.mjs server/index.ts
+             └─5191 /home/ubuntu/canvas-course-generator/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.21.5 --ping
+
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]:   'DATABASE_URL',
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]:   'CANVAS_API_TOKEN',
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]:   'OKTA_CLIENT_ID',
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]:   'PORT'
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]: ]
+Jul 16 16:23:12 ip-172-31-31-157 node[5148]: Production server started, running development server on port 5000
+Jul 16 16:23:12 ip-172-31-31-157 node[5156]: > rest-express@1.0.0 dev
+Jul 16 16:23:12 ip-172-31-31-157 node[5156]: > NODE_ENV=development tsx server/index.ts
+Jul 16 16:23:14 ip-172-31-31-157 node[5179]: [dotenv@17.2.0] injecting env (0) from .env (tip: ⚙️  enable debug logging with { debug: true })
+Jul 16 16:23:14 ip-172-31-31-157 node[5179]: 4:23:14 PM [express] serving on port 5000
+
+4. Checking for build cache...
+❌ No build cache found
+
+5. Checking node_modules for Okta packages...
+✓ Okta packages found:
+total 24
+drwxr-xr-x   4 ubuntu ubuntu  4096 Jul 16 16:08 .
+drwxr-xr-x 369 ubuntu ubuntu 12288 Jul 16 16:23 ..
+drwxr-xr-x   8 ubuntu ubuntu  4096 Jul 16 16:08 okta-auth-js
+drwxr-xr-x   3 ubuntu ubuntu  4096 Jul 16 16:08 okta-react
+
+=== Diagnosis complete ===
+Next steps:
+1. Verify the okta-config.ts file has the correct issuer URL
+2. Ensure App.tsx has the Security component
+3. Check that .env has OKTA_ISSUER variable
+4. Clear browser cache and try again
