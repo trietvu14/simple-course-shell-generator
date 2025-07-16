@@ -46,7 +46,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Security oktaAuth={oktaAuth}>
+      <Security 
+        oktaAuth={oktaAuth}
+        restoreOriginalUri={async (oktaAuth, originalUri) => {
+          window.location.replace(originalUri || '/dashboard');
+        }}
+      >
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
