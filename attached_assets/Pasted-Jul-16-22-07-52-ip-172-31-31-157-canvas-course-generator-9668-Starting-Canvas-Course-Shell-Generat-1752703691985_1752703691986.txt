@@ -1,0 +1,18 @@
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: Starting Canvas Course Shell Generator...
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: Loading environment variables from .env file...
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: Environment variables loaded: [
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'NODE_ENV',           'PORT',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'DATABASE_URL',       'CANVAS_API_URL',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'CANVAS_API_TOKEN',   'OKTA_CLIENT_ID',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'OKTA_CLIENT_SECRET', 'OKTA_ISSUER',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'SESSION_SECRET',     'LOG_LEVEL',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'MAX_UPLOAD_SIZE',    'SSL_CERT_PATH',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'SSL_KEY_PATH',       'ENABLE_METRICS',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'METRICS_PORT',       'RATE_LIMIT_WINDOW_MS',
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]:   'RATE_LIMIT_MAX'
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: ]
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: Production server started, running development server on por>Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9675]: > rest-express@1.0.0 dev
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9675]: > NODE_ENV=development tsx server/index.ts
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9686]: sh: 1: tsx: not found
+Jul 16 22:07:52 ip-172-31-31-157 canvas-course-generator[9668]: Server exited with code 127
+Jul 16 22:07:52 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited, status=127/n>Jul 16 22:07:52 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.

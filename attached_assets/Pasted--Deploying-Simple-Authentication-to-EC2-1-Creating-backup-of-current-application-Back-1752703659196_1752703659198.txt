@@ -1,0 +1,45 @@
+=== Deploying Simple Authentication to EC2 ===
+1. Creating backup of current application...
+✓ Backup created at: /home/ubuntu/canvas-course-generator-backup-20250716-220659
+2. Stopping canvas-course-generator service...
+3. Copying updated files...
+cp: '../server/db.ts' and '/home/ubuntu/canvas-course-generator/server/db.ts' are the same file
+cp: '../server/health.ts' and '/home/ubuntu/canvas-course-generator/server/health.ts' are the same file
+cp: '../server/index.ts' and '/home/ubuntu/canvas-course-generator/server/index.ts' are the same file
+cp: '../server/routes.ts' and '/home/ubuntu/canvas-course-generator/server/routes.ts' are the same file
+cp: '../server/simple-routes.ts' and '/home/ubuntu/canvas-course-generator/server/simple-routes.ts' are the same file
+cp: '../server/storage.ts' and '/home/ubuntu/canvas-course-generator/server/storage.ts' are the same file
+cp: '../server/vite.ts' and '/home/ubuntu/canvas-course-generator/server/vite.ts' are the same file
+cp: '../client/index.html' and '/home/ubuntu/canvas-course-generator/client/index.html' are the same file
+cp: '../client/src' and '/home/ubuntu/canvas-course-generator/client/src' are the same file
+cp: '../shared/schema.ts' and '/home/ubuntu/canvas-course-generator/shared/schema.ts' are the same file
+4. Setting proper permissions...
+5. Testing nginx configuration...
+nginx: [warn] duplicate MIME type "text/html" in /etc/nginx/sites-enabled/canvas-course-generator:56
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+6. Reloading nginx...
+7. Starting canvas-course-generator service...
+8. Waiting for service to start...
+9. Checking service status...
+❌ Service failed to start. Checking logs...
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]: Starting Canvas Course Shell Generator...
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]: Loading environment variables from .env file...
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]: Environment variables loaded: [
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'NODE_ENV',           'PORT',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'DATABASE_URL',       'CANVAS_API_URL',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'CANVAS_API_TOKEN',   'OKTA_CLIENT_ID',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'OKTA_CLIENT_SECRET', 'OKTA_ISSUER',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'SESSION_SECRET',     'LOG_LEVEL',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'MAX_UPLOAD_SIZE',    'SSL_CERT_PATH',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'SSL_KEY_PATH',       'ENABLE_METRICS',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'METRICS_PORT',       'RATE_LIMIT_WINDOW_MS',
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]:   'RATE_LIMIT_MAX'
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]: ]
+Jul 16 22:06:59 ip-172-31-31-157 canvas-course-generator[9463]: Production server started, running development server on port 5000
+Jul 16 22:07:00 ip-172-31-31-157 canvas-course-generator[9471]: > rest-express@1.0.0 dev
+Jul 16 22:07:00 ip-172-31-31-157 canvas-course-generator[9471]: > NODE_ENV=development tsx server/index.ts
+Jul 16 22:07:00 ip-172-31-31-157 canvas-course-generator[9482]: sh: 1: tsx: not found
+Jul 16 22:07:00 ip-172-31-31-157 canvas-course-generator[9463]: Server exited with code 127
+Jul 16 22:07:00 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited, status=127/n/a
+Jul 16 22:07:00 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
