@@ -7,12 +7,15 @@ This is a full-stack web application for creating Canvas course shells through a
 ## Recent Changes
 
 **July 16, 2025**
-- **DEPLOYMENT FIX**: Fixed critical database migration issue in deployment process
-- Database tables were not being created during deployment, causing 500 errors
-- Added database migration step to deployment/setup-systemd.sh script
-- Created deployment/create-db-tables.sql for manual table creation
-- Updated DEPLOYMENT.md to include database migration requirements
-- **LESSON LEARNED**: Database migration must be part of deployment process, not optional
+- **SIMPLIFIED ARCHITECTURE**: Successfully deployed monolithic application with only 4 dependencies
+- **DEPLOYMENT SUCCESS**: Fixed directory path issues and systemd service configuration
+- Application now running at /home/ubuntu/simple-course-shell-generator
+- **ARCHITECTURE SIMPLIFIED**: Eliminated TypeScript compilation, build processes, and microservices
+- **CORE DEPENDENCIES**: Reduced to express, express-session, pg, dotenv only
+- **SINGLE-FILE SERVER**: simple-server.js contains entire backend application
+- **VANILLA FRONTEND**: public/index.html with vanilla JavaScript, no build required
+- **OKTA INTEGRATION**: Maintained OAuth 2.0 authentication with Digital Promise
+- **PRODUCTION READY**: Running on port 5000 with systemd service management
 
 **July 15, 2025**
 - Updated header to use official Canvas logo instead of graduation cap icon

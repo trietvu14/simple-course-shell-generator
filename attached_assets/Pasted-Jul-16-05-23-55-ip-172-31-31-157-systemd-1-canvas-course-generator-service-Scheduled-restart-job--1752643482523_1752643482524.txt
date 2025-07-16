@@ -1,0 +1,12 @@
+Jul 16 05:23:55 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 05:23:55 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:23:55 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:23:55 ip-172-31-31-157 systemd[6302]: canvas-course-generator.service: Changing to the requested work>Jul 16 05:23:55 ip-172-31-31-157 systemd[6302]: canvas-course-generator.service: Failed at step CHDIR spawning >Jul 16 05:23:55 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited,>Jul 16 05:23:55 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 05:24:06 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 05:24:06 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:24:06 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:24:06 ip-172-31-31-157 systemd[6303]: canvas-course-generator.service: Changing to the requested work>Jul 16 05:24:06 ip-172-31-31-157 systemd[6303]: canvas-course-generator.service: Failed at step CHDIR spawning >Jul 16 05:24:06 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited,>Jul 16 05:24:06 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 05:24:08 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:24:09 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:24:09 ip-172-31-31-157 node[6414]: Warning: connect.session() MemoryStore is not
+Jul 16 05:24:09 ip-172-31-31-157 node[6414]: designed for a production environment, as it will leak
+Jul 16 05:24:09 ip-172-31-31-157 node[6414]: memory, and will not scale past a single process.
+Jul 16 05:24:09 ip-172-31-31-157 node[6414]: Canvas Course Shell Generator running on port 5000
