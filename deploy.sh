@@ -2,6 +2,9 @@
 
 echo "Deploying Canvas Course Shell Generator..."
 
+# Ensure we're in the correct directory
+cd /home/ubuntu/course-shell-generator
+
 # Stop the current service if it exists
 sudo systemctl stop canvas-course-generator 2>/dev/null || true
 
@@ -12,7 +15,7 @@ npm install
 
 # Create .env file with production settings
 echo "Creating .env file..."
-cat > .env << 'EOF'
+cat > /home/ubuntu/course-shell-generator/.env << 'EOF'
 NODE_ENV=production
 PORT=5000
 DATABASE_URL=postgresql://canvas_app:DPVils25!@localhost:5432/canvas_course_generator

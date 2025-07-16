@@ -1,0 +1,11 @@
+Jul 16 04:48:54 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator.
+Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files:>Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No su>Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 04:49:04 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator.
+Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files:>Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No su>Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 04:49:14 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator.
+Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to load environment files:>Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed to run 'start' task: No su>Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'resources'.
+Jul 16 04:49:25 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator.
+Jul 16 04:49:30 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
