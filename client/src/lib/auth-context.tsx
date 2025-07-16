@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useOktaAuth } from '@okta/okta-react';
-import { apiRequest } from './queryClient';
 
 export interface User {
   id: number;
@@ -21,7 +19,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { oktaAuth, authState } = useOktaAuth();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
