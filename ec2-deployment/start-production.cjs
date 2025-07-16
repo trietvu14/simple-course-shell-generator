@@ -10,7 +10,8 @@ const fs = require('fs');
 console.log('Starting Canvas Course Shell Generator...');
 
 // Change to the project directory
-process.chdir('/home/ubuntu/canvas-course-generator');
+const projectDir = '/home/ubuntu/canvas-course-generator';
+process.chdir(projectDir);
 
 // Load .env file manually
 const envPath = path.join(process.cwd(), '.env');

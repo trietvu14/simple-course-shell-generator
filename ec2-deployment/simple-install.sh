@@ -14,8 +14,17 @@ fi
 sudo mkdir -p /home/ubuntu/canvas-course-generator
 sudo chown ubuntu:ubuntu /home/ubuntu/canvas-course-generator
 
-# Copy all files
+# Copy all files to the new directory
 cp -r * /home/ubuntu/canvas-course-generator/
+
+# If old directory exists, preserve any custom configurations
+if [ -d "/home/ubuntu/simple-course-shell-generator" ]; then
+    echo "Found old installation directory, preserving configurations..."
+    if [ -f "/home/ubuntu/simple-course-shell-generator/.env" ]; then
+        echo "   Preserving existing .env file..."
+        cp /home/ubuntu/simple-course-shell-generator/.env /home/ubuntu/canvas-course-generator/.env.backup
+    fi
+fi
 
 # Install dependencies
 cd /home/ubuntu/canvas-course-generator
