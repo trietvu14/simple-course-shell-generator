@@ -26,48 +26,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshAuth = async () => {
-    if (!authState?.isAuthenticated || !authState.idToken) {
-      setUser(null);
-      setIsLoading(false);
-      localStorage.removeItem('okta-user');
-      return;
+    // Temporary bypass for development - use test authentication
+    try {
+      const response = await fetch('/api/auth/test-login');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+        setIsLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Test auth failed:', error);
     }
 
-    try {
-      // Get user info from Okta token
-      const userInfo = await oktaAuth.getUser();
-      
-      // Store user info in localStorage for API calls
-      localStorage.setItem('okta-user', JSON.stringify(userInfo));
-      
-      // Send user info to backend to create/update user record
-      const response = await apiRequest('POST', '/api/auth/okta-callback', {
-        oktaId: userInfo.sub,
-        email: userInfo.email,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-      });
-      
-      const userData = await response.json();
-      setUser(userData);
-    } catch (error) {
-      console.error('Auth refresh failed:', error);
-      setUser(null);
-      localStorage.removeItem('okta-user');
-    } finally {
-      setIsLoading(false);
-    }
+    // Original Okta authentication logic (commented out for now)
+    // if (!authState?.isAuthenticated || !authState.idToken) {
+    //   setUser(null);
+    //   setIsLoading(false);
+    //   localStorage.removeItem('okta-user');
+    //   return;
+    // }
+
+    // try {
+    //   // Get user info from Okta token
+    //   const userInfo = await oktaAuth.getUser();
+    //   
+    //   // Store user info in localStorage for API calls
+    //   localStorage.setItem('okta-user', JSON.stringify(userInfo));
+    //   
+    //   // Send user info to backend to create/update user record
+    //   const response = await apiRequest('POST', '/api/auth/okta-callback', {
+    //     oktaId: userInfo.sub,
+    //     email: userInfo.email,
+    //     firstName: userInfo.given_name,
+    //     lastName: userInfo.family_name,
+    //   });
+    //   
+    //   const userData = await response.json();
+    //   setUser(userData);
+    // } catch (error) {
+    //   console.error('Auth refresh failed:', error);
+    //   setUser(null);
+    //   localStorage.removeItem('okta-user');
+    // } finally {
+    //   setIsLoading(false);
+    // }
+    
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    if (authState?.isAuthenticated !== undefined) {
-      refreshAuth();
-    }
-  }, [authState?.isAuthenticated]);
+    refreshAuth();
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await oktaAuth.signOut();
       setUser(null);
       localStorage.removeItem('okta-user');
     } catch (error) {
@@ -78,8 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user,
-      isAuthenticated: !!user && !!authState?.isAuthenticated,
-      isLoading: isLoading || !authState,
+      isAuthenticated: !!user,
+      isLoading,
       logout: handleLogout,
       refreshAuth,
     }}>
