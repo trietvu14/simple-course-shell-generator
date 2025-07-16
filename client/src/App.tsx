@@ -3,6 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Security } from '@okta/okta-react';
+import { oktaAuth } from './lib/okta-config';
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
@@ -44,12 +46,19 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </AuthProvider>
+      <Security 
+        oktaAuth={oktaAuth}
+        restoreOriginalUri={async (oktaAuth, originalUri) => {
+          window.location.replace(originalUri || '/dashboard');
+        }}
+      >
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </Security>
     </QueryClientProvider>
   );
 }
