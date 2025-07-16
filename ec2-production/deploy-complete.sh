@@ -51,15 +51,24 @@ echo "9. Checking service status..."
 sleep 5
 sudo systemctl status canvas-course-generator.service --no-pager -l
 
+# Setup nginx configuration
+echo "10. Setting up nginx configuration..."
+cd ec2-production
+./setup-nginx.sh
+
 echo ""
 echo "=== Deployment Complete ==="
 echo "✓ Simple authentication enabled (admin / P@ssword01)"
 echo "✓ Canvas API integration ready"
 echo "✓ Service running on port 5000"
 echo "✓ Database connection configured"
+echo "✓ Nginx proxy configured"
 echo ""
 echo "Access the application at: https://shell.dpvils.org"
 echo "Login with: admin / P@ssword01"
 echo ""
-echo "To check logs: sudo journalctl -u canvas-course-generator.service -f"
-echo "To restart: sudo systemctl restart canvas-course-generator.service"
+echo "Useful commands:"
+echo "• Check app logs: sudo journalctl -u canvas-course-generator.service -f"
+echo "• Restart app: sudo systemctl restart canvas-course-generator.service"
+echo "• Check nginx: sudo systemctl status nginx"
+echo "• Nginx logs: sudo tail -f /var/log/nginx/error.log"
