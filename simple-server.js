@@ -160,25 +160,55 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Get Canvas accounts
+// Get Canvas accounts with sub-accounts
 app.get('/api/accounts', requireAuth, async (req, res) => {
   try {
-    const response = await fetch(`${CANVAS_API_URL}/accounts`, {
+    console.log('Fetching Canvas accounts...');
+    
+    // First get the root account
+    const rootResponse = await fetch(`${CANVAS_API_URL}/accounts`, {
       headers: {
         'Authorization': `Bearer ${CANVAS_API_TOKEN}`,
         'Content-Type': 'application/json'
       }
     });
     
-    if (!response.ok) {
-      throw new Error(`Canvas API error: ${response.status}`);
+    if (!rootResponse.ok) {
+      throw new Error(`Canvas API error: ${rootResponse.status}`);
     }
     
-    const accounts = await response.json();
-    res.json(accounts);
+    const rootAccounts = await rootResponse.json();
+    console.log('Root accounts:', rootAccounts);
+    
+    // Get sub-accounts for each root account
+    const allAccounts = [];
+    
+    for (const rootAccount of rootAccounts) {
+      allAccounts.push(rootAccount);
+      
+      try {
+        // Get sub-accounts
+        const subResponse = await fetch(`${CANVAS_API_URL}/accounts/${rootAccount.id}/sub_accounts?recursive=true`, {
+          headers: {
+            'Authorization': `Bearer ${CANVAS_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (subResponse.ok) {
+          const subAccounts = await subResponse.json();
+          allAccounts.push(...subAccounts);
+        }
+      } catch (subError) {
+        console.warn(`Error fetching sub-accounts for ${rootAccount.name}:`, subError);
+      }
+    }
+    
+    console.log(`Total accounts found: ${allAccounts.length}`);
+    res.json(allAccounts);
   } catch (error) {
     console.error('Error fetching accounts:', error);
-    res.status(500).json({ error: 'Failed to fetch accounts' });
+    res.status(500).json({ error: 'Failed to fetch accounts', details: error.message });
   }
 });
 

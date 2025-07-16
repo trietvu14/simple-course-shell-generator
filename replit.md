@@ -7,6 +7,9 @@ This is a full-stack web application for creating Canvas course shells through a
 ## Recent Changes
 
 **July 16, 2025**
+- **CANVAS API INTEGRATION**: Successfully updated Canvas API token and implemented recursive account fetching
+- **AUTHENTICATION FLOW**: Okta redirect URI configuration completed for https://shell.dpvils.org/callback
+- **ACCOUNT LOADING**: Enhanced Canvas API integration to fetch root accounts and sub-accounts recursively
 - **SIMPLIFIED ARCHITECTURE**: Successfully deployed monolithic application with only 4 dependencies
 - **DEPLOYMENT SUCCESS**: Fixed directory path issues and systemd service configuration
 - Application now running at /home/ubuntu/simple-course-shell-generator
