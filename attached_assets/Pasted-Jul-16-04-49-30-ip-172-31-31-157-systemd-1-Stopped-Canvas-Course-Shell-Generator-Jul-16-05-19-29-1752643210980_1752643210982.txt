@@ -1,0 +1,10 @@
+Jul 16 04:49:30 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:19:29 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:19:29 ip-172-31-31-157 systemd[6220]: canvas-course-generator.service: Changing to the requested work>Jul 16 05:19:29 ip-172-31-31-157 systemd[6220]: canvas-course-generator.service: Failed at step CHDIR spawning >Jul 16 05:19:29 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited,>Jul 16 05:19:29 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 05:19:39 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 05:19:39 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:19:39 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:19:39 ip-172-31-31-157 systemd[6226]: canvas-course-generator.service: Changing to the requested work>Jul 16 05:19:39 ip-172-31-31-157 systemd[6226]: canvas-course-generator.service: Failed at step CHDIR spawning >Jul 16 05:19:39 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited,>Jul 16 05:19:39 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 16 05:19:50 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart co>Jul 16 05:19:50 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator.
+Jul 16 05:19:50 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator.
+Jul 16 05:19:50 ip-172-31-31-157 systemd[6235]: canvas-course-generator.service: Changing to the requested work>Jul 16 05:19:50 ip-172-31-31-157 systemd[6235]: canvas-course-generator.service: Failed at step CHDIR spawning >Jul 16 05:19:50 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited,>Jul 16 05:19:50 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+lines 1-20/20 (END)
