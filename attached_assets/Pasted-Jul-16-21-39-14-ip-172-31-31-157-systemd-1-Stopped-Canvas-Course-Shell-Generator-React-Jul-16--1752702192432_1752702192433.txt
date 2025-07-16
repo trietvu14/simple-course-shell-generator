@@ -1,0 +1,18 @@
+Jul 16 21:39:14 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator (React).
+Jul 16 21:42:12 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator (React).
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]: Starting Canvas Course Shell Generator...
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]: Loading environment variables from .env file...
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]: Environment variables loaded: [
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'NODE_ENV',           'PORT',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'DATABASE_URL',       'CANVAS_API_URL',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'CANVAS_API_TOKEN',   'OKTA_CLIENT_ID',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'OKTA_CLIENT_SECRET', 'OKTA_ISSUER',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'SESSION_SECRET',     'LOG_LEVEL',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'MAX_UPLOAD_SIZE',    'SSL_CERT_PATH',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'SSL_KEY_PATH',       'ENABLE_METRICS',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'METRICS_PORT',       'RATE_LIMIT_WINDOW_MS',
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]:   'RATE_LIMIT_MAX'
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]: ]
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9016]: Production server started, running development server on por>Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9024]: > rest-express@1.0.0 dev
+Jul 16 21:42:12 ip-172-31-31-157 canvas-course-generator[9024]: > NODE_ENV=development tsx server/index.ts
+Jul 16 21:42:14 ip-172-31-31-157 canvas-course-generator[9047]: [dotenv@17.2.0] injecting env (0) from .env (tip: � encrypt> Jul 16 21:42:14 ip-172-31-31-157 canvas-course-generator[9047]: 9:42:14 PM [express] serving on port 5000
