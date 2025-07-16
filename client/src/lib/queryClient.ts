@@ -24,8 +24,8 @@ export async function apiRequest(
     headers["Content-Type"] = "application/json";
   }
   
-  if (user?.sub) {
-    headers["x-okta-user-id"] = user.sub;
+  if (user) {
+    headers["x-okta-user"] = JSON.stringify(user);
   }
 
   const res = await fetch(url, {
@@ -48,8 +48,8 @@ export const getQueryFn: <T>(options: {
     const user = getOktaUser();
     const headers: Record<string, string> = {};
     
-    if (user?.sub) {
-      headers["x-okta-user-id"] = user.sub;
+    if (user) {
+      headers["x-okta-user"] = JSON.stringify(user);
     }
 
     const res = await fetch(queryKey.join("/") as string, {

@@ -150,45 +150,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test authentication endpoint - creates a temporary user for testing
-  app.get('/api/auth/test-login', async (req: Request, res: Response) => {
+  // Okta callback endpoint - handles user registration/login
+  app.post('/api/auth/okta-callback', async (req: Request, res: Response) => {
     try {
-      // Create a temporary test user
-      const testUser = {
-        oktaId: 'test-user-1',
-        email: 'test@digitalpromise.org',
-        firstName: 'Test',
-        lastName: 'User'
-      };
+      const { oktaId, email, firstName, lastName } = req.body;
       
-      // Store user in database if not exists
-      const user = await storage.upsertUser(testUser);
+      if (!oktaId) {
+        return res.status(400).json({ message: 'Okta ID is required' });
+      }
+      
+      // Create or update user in database
+      const user = await storage.upsertUser({
+        oktaId,
+        email: email || `${oktaId}@digitalpromise.org`,
+        firstName: firstName || 'Unknown',
+        lastName: lastName || 'User'
+      });
       
       res.json(user);
     } catch (error) {
-      console.error("Error creating test user:", error);
-      res.status(500).json({ message: "Failed to create test user" });
+      console.error("Error in Okta callback:", error);
+      res.status(500).json({ message: "Failed to process Okta callback" });
     }
   });
 
-  // Authentication middleware - simplified for development with auto-test user creation
+  // Authentication middleware - requires Okta user in localStorage
   const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    // For development, use test user or header
-    const oktaId = req.headers['x-okta-user-id'] as string || 'test-user-1';
+    const oktaUserHeader = req.headers['x-okta-user'] as string;
+    
+    if (!oktaUserHeader) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
     
     try {
+      const oktaUser = JSON.parse(oktaUserHeader);
+      const oktaId = oktaUser.sub;
+      
+      if (!oktaId) {
+        return res.status(401).json({ message: 'Invalid authentication token' });
+      }
+      
       let user = await storage.getUserByOktaId(oktaId);
       
-      // If user doesn't exist, create test user automatically
+      // If user doesn't exist, create from Okta info
       if (!user) {
-        const testUser = {
+        const newUser = {
           oktaId: oktaId,
-          email: 'test@digitalpromise.org',
-          firstName: 'Test',
-          lastName: 'User'
+          email: oktaUser.email || `${oktaId}@digitalpromise.org`,
+          firstName: oktaUser.given_name || 'Unknown',
+          lastName: oktaUser.family_name || 'User'
         };
-        user = await storage.upsertUser(testUser);
-        console.log('Created test user:', user);
+        user = await storage.upsertUser(newUser);
+        console.log('Created new user from Okta:', user);
       }
       
       (req as AuthenticatedRequest).user = user;

@@ -18,6 +18,7 @@ This is a full-stack web application for creating Canvas course shells through a
 - **DATABASE OPERATIONS**: All CRUD operations working correctly with PostgreSQL
 - **PRODUCTION READY**: EC2 deployment package ready for https://shell.dpvils.org upgrade
 - **AUTHENTICATION CORRECTED**: Removed test authentication, deployment uses proper Okta authentication
+- **REPOSITORY UPDATED**: Both repository and deployment package now use production Okta authentication
 
 **July 15, 2025**
 - Updated header to use official Canvas logo instead of graduation cap icon
