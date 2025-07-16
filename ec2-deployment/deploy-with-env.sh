@@ -21,39 +21,33 @@ cp -r * /home/ubuntu/canvas-course-generator/
 cd /home/ubuntu/canvas-course-generator
 npm install
 
-# Check if .env file exists, if not create template
-if [ ! -f .env ]; then
-    echo "📝 Creating .env template..."
+# Use the working .env.simple file as the production .env
+if [ -f .env.simple ]; then
+    echo "📝 Using .env.simple as production environment configuration..."
+    cp .env.simple .env
+    echo "✅ Production environment configured with working credentials"
+else
+    echo "⚠️  .env.simple not found, creating basic template..."
     cat > .env << 'ENV_EOF'
 # Database Configuration
-DATABASE_URL=postgresql://canvas_user:your_password@localhost:5432/canvas_db
+DATABASE_URL=postgresql://canvas_app:DPVils25!@localhost:5432/canvas_course_generator
 
-# Canvas API Configuration
-CANVAS_API_TOKEN=your_canvas_token_here
-CANVAS_API_URL=https://canvas.instructure.com
+# Canvas API Configuration  
+CANVAS_API_TOKEN=28098~rvMvz2ZRQyCXPrQPHeREnyvZhcuM22yKF8Bh3vKYJUkmQhTkwfKTRMm7UTWDe7mG
+CANVAS_API_URL=https://dppowerfullearning.instructure.com/api/v1
 
 # Okta Configuration
-OKTA_CLIENT_ID=your_okta_client_id
-OKTA_CLIENT_SECRET=your_okta_client_secret
-OKTA_ISSUER=https://your-okta-domain.okta.com
+OKTA_CLIENT_ID=0oapma7d718cb4oYu5d7
+OKTA_CLIENT_SECRET=Ez5CUFKEF2-MdAthRXS6EteDzs8sO28iUMDhHyFETDtIaVt1XufExidViy8uGGRz
+OKTA_ISSUER=https://digitalpromise.okta.com/oauth2/default
+OKTA_REDIRECT_URI=https://shell.dpvils.org/callback
 
 # Application Configuration
 PORT=5000
 NODE_ENV=production
+SESSION_SECRET=03fd8fb82564409ebe0c2678ff5c4fe9
 ENV_EOF
-    
-    echo "⚠️  IMPORTANT: You need to update the .env file with your actual credentials:"
-    echo "   1. Edit: /home/ubuntu/canvas-course-generator/.env"
-    echo "   2. Update DATABASE_URL with your PostgreSQL credentials"
-    echo "   3. Update CANVAS_API_TOKEN with your Canvas API token"
-    echo "   4. Update OKTA_* values with your Okta configuration"
-    echo ""
-    echo "💡 After updating .env, restart the service with:"
-    echo "   sudo systemctl restart canvas-course-generator"
-    echo ""
-    read -p "Press Enter to continue with deployment (you can update .env later)..."
-else
-    echo "✅ .env file already exists, using existing configuration"
+    echo "✅ Production environment configured with working credentials"
 fi
 
 # Make start script executable
