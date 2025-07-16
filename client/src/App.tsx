@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
 import Callback from "@/pages/callback";
 import NotFound from "@/pages/not-found";
+import TestAuth from "@/components/test-auth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,7 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+      <Route path="/test" component={TestAuth} />
       <Route path="/login" component={Login} />
       <Route path="/callback" component={Callback} />
       <Route component={NotFound} />

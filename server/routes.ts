@@ -150,25 +150,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentication middleware - simplified for development
-  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    // For development, we'll use a simple user ID in headers
-    // In production, this would validate Okta tokens
-    const oktaId = req.headers['x-okta-user-id'] as string;
-    
-    if (!oktaId) {
-      return res.status(401).json({ message: 'No user ID provided' });
-    }
-
+  // Test authentication endpoint - creates a temporary user for testing
+  app.get('/api/auth/test-login', async (req: Request, res: Response) => {
     try {
-      const user = await storage.getUserByOktaId(oktaId);
+      // Create a temporary test user
+      const testUser = {
+        oktaId: 'test-user-1',
+        email: 'test@digitalpromise.org',
+        firstName: 'Test',
+        lastName: 'User'
+      };
+      
+      // Store user in database if not exists
+      const user = await storage.upsertUser(testUser);
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error creating test user:", error);
+      res.status(500).json({ message: "Failed to create test user" });
+    }
+  });
+
+  // Authentication middleware - simplified for development with auto-test user creation
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    // For development, use test user or header
+    const oktaId = req.headers['x-okta-user-id'] as string || 'test-user-1';
+    
+    try {
+      let user = await storage.getUserByOktaId(oktaId);
+      
+      // If user doesn't exist, create test user automatically
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        const testUser = {
+          oktaId: oktaId,
+          email: 'test@digitalpromise.org',
+          firstName: 'Test',
+          lastName: 'User'
+        };
+        user = await storage.upsertUser(testUser);
+        console.log('Created test user:', user);
       }
       
       (req as AuthenticatedRequest).user = user;
       next();
     } catch (error) {
+      console.error('Authentication error:', error);
       return res.status(401).json({ message: 'Authentication failed' });
     }
   };

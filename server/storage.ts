@@ -24,6 +24,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByOktaId(oktaId: string): Promise<User | undefined>;
   createUser(insertUser: InsertUser): Promise<User>;
+  upsertUser(userData: InsertUser): Promise<User>;
   
   // User session methods
   getUserSessionByToken(token: string): Promise<UserSession | undefined>;
@@ -64,6 +65,43 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async upsertUser(userData: InsertUser): Promise<User> {
+    try {
+      console.log('Upserting user with data:', userData);
+      
+      // First try to find existing user
+      const existingUser = await this.getUserByOktaId(userData.oktaId);
+      if (existingUser) {
+        console.log('User already exists, updating:', existingUser.id);
+        const [updatedUser] = await db
+          .update(users)
+          .set({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.oktaId, userData.oktaId))
+          .returning();
+        console.log('Updated user:', updatedUser);
+        return updatedUser;
+      }
+      
+      // Create new user
+      console.log('Creating new user');
+      const [newUser] = await db
+        .insert(users)
+        .values(userData)
+        .returning();
+      console.log('Created user:', newUser);
+      return newUser;
+    } catch (error) {
+      console.error('Error in upsertUser:', error);
+      console.error('User data:', userData);
+      throw error;
+    }
   }
 
   // User session methods
