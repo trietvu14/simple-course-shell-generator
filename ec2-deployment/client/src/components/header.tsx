@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
-import { LogOut } from "lucide-react";
-import canvasLogo from "@assets/Canvas_logo_single_mark_1752601762771.png";
+import { LogOut, BookOpen } from "lucide-react";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -19,11 +18,9 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <img 
-                src={canvasLogo} 
-                alt="Canvas Logo" 
-                className="h-8 w-auto mr-3"
-              />
+              <div className="bg-orange-600 rounded-lg p-1.5 mr-3">
+                <BookOpen className="h-5 w-5 text-white" />
+              </div>
               <h1 className="text-xl font-semibold text-neutral-800">Canvas Course Shell Generator</h1>
             </div>
           </div>

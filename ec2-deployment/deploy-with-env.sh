@@ -95,13 +95,16 @@ else
     echo "   Update your .env file and run: npm run db:push"
 fi
 
-# Build the React application for production
+# Build the React application for production (optional, can be skipped for faster deployment)
 echo "🏗️  Building React application for production..."
-if npm run build; then
+echo "   This may take a few minutes..."
+if timeout 300 npm run build; then
     echo "✅ React application built successfully"
     echo "   Static files available in: /home/ubuntu/canvas-course-generator/dist/"
+    echo "   Update your nginx configuration to serve from /home/ubuntu/canvas-course-generator/dist/"
 else
-    echo "⚠️  React build failed - will run in development mode"
+    echo "⚠️  React build failed or timed out - application will run in development mode"
+    echo "   The application will still work correctly, just not optimized for production"
 fi
 
 # Start the service
