@@ -5,11 +5,35 @@
 
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 console.log('Starting Canvas Course Shell Generator...');
 
 // Change to the project directory
 process.chdir('/home/ubuntu/canvas-course-generator');
+
+// Load .env file manually
+const envPath = path.join(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+  console.log('Loading environment variables from .env file...');
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  
+  envContent.split('\n').forEach(line => {
+    const [key, ...valueParts] = line.split('=');
+    if (key && valueParts.length > 0) {
+      const value = valueParts.join('=').trim();
+      if (value && !key.startsWith('#')) {
+        process.env[key.trim()] = value;
+      }
+    }
+  });
+  
+  console.log('Environment variables loaded:', Object.keys(process.env).filter(key => 
+    ['DATABASE_URL', 'CANVAS_API_TOKEN', 'OKTA_CLIENT_ID', 'PORT', 'NODE_ENV'].includes(key)
+  ));
+} else {
+  console.warn('No .env file found at:', envPath);
+}
 
 // Set environment variables
 process.env.NODE_ENV = 'production';
