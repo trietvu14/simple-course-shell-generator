@@ -21,6 +21,21 @@ cp -r * /home/ubuntu/canvas-course-generator/
 cd /home/ubuntu/canvas-course-generator
 npm install
 
+# Create .env file if it doesn't exist
+if [ ! -f .env ]; then
+    echo "Creating .env file..."
+    cat > .env << 'ENV_EOF'
+DATABASE_URL=postgresql://canvas_user:your_password@localhost:5432/canvas_db
+CANVAS_API_TOKEN=your_canvas_token
+CANVAS_API_URL=https://canvas.instructure.com
+OKTA_CLIENT_ID=your_okta_client_id
+OKTA_CLIENT_SECRET=your_okta_client_secret
+OKTA_ISSUER=https://your-okta-domain.okta.com
+ENV_EOF
+    echo "⚠️  IMPORTANT: Update the .env file with your actual database and API credentials"
+    echo "   Edit: /home/ubuntu/canvas-course-generator/.env"
+fi
+
 # Update database schema
 npm run db:push
 
