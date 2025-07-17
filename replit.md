@@ -6,6 +6,18 @@ This is a full-stack web application for creating Canvas course shells through a
 
 ## Recent Changes
 
+**July 17, 2025**
+- **CANVAS OAUTH REFRESH TOKENS**: Implemented complete Canvas OAuth system with automatic token refresh
+- **TOKEN MANAGEMENT**: Added database schema for storing Canvas access and refresh tokens
+- **AUTOMATIC REFRESH**: System automatically refreshes expired tokens (1-hour expiry) using refresh tokens
+- **OAUTH FLOW**: Complete OAuth authorization flow with state validation and security measures
+- **API INTEGRATION**: Updated all Canvas API calls to use OAuth tokens instead of static bearer tokens
+- **ERROR HANDLING**: Robust error handling for token refresh failures and API timeouts
+- **SECURITY**: Implemented proper token storage, rotation, and revocation mechanisms
+- **PRODUCTION READY**: Created deployment scripts and setup guides for EC2 production environment
+- **DATABASE MIGRATION**: Successfully pushed Canvas tokens table schema to production database
+- **DOCUMENTATION**: Comprehensive setup guide for Canvas developer key configuration
+
 **July 16, 2025**
 - **REPLIT REACT APP WORKING**: Successfully implemented full React application with authentication
 - **CANVAS API INTEGRATION**: Successfully updated Canvas API token and implemented recursive account fetching
@@ -60,9 +72,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Schema
 - **Users**: Stores user information with Okta integration
+- **Canvas Tokens**: Stores Canvas OAuth access and refresh tokens with expiry tracking
 - **Canvas Accounts**: Caches Canvas account hierarchy
 - **Course Shells**: Tracks course shell creation requests and status
 - **Creation Batches**: Groups course shell creation operations for progress tracking
+- **User Sessions**: Manages user authentication sessions
 
 ## Key Components
 
@@ -72,9 +86,12 @@ Preferred communication style: Simple, everyday language.
 - **User Storage**: Database-backed user management with Okta ID mapping
 
 ### Canvas Integration
-- **Account Management**: Fetches and caches Canvas account hierarchy
-- **Course Creation**: Batch creation of course shells via Canvas API
+- **OAuth Authentication**: Complete OAuth 2.0 flow with Canvas for secure API access
+- **Token Management**: Automatic refresh of Canvas access tokens (1-hour expiry)
+- **Account Management**: Fetches and caches Canvas account hierarchy using OAuth tokens
+- **Course Creation**: Batch creation of course shells via authenticated Canvas API
 - **Progress Tracking**: Real-time status updates for bulk operations
+- **Error Handling**: Automatic token refresh on API failures and comprehensive error recovery
 
 ### User Interface
 - **Dashboard**: Main interface for course shell management
@@ -101,8 +118,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Canvas LMS Integration
 - **Canvas API**: REST API for account management and course creation
-- **Authentication**: Bearer token authentication with Canvas
+- **OAuth 2.0**: Complete OAuth authentication flow with automatic token refresh
+- **Token Management**: Handles 1-hour access token expiry with refresh token rotation
 - **Rate Limiting**: Handles Canvas API rate limits during bulk operations
+- **Error Recovery**: Automatic token refresh on 401 errors and comprehensive retry logic
 
 ### Database Services
 - **Neon PostgreSQL**: Serverless PostgreSQL hosting

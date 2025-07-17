@@ -4,6 +4,7 @@ import {
   courseShells, 
   creationBatches, 
   userSessions,
+  canvasTokens,
   type User, 
   type InsertUser,
   type CanvasAccount,
@@ -13,7 +14,9 @@ import {
   type CreationBatch,
   type InsertCreationBatch,
   type UserSession,
-  type InsertUserSession
+  type InsertUserSession,
+  type CanvasToken,
+  type InsertCanvasToken
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -29,6 +32,11 @@ export interface IStorage {
   // User session methods
   getUserSessionByToken(token: string): Promise<UserSession | undefined>;
   createUserSession(insertSession: InsertUserSession): Promise<UserSession>;
+  
+  // Canvas token methods
+  getCanvasToken(userId: number): Promise<CanvasToken | undefined>;
+  upsertCanvasToken(tokenData: InsertCanvasToken): Promise<CanvasToken>;
+  deleteCanvasToken(userId: number): Promise<void>;
   
   // Canvas account methods
   upsertCanvasAccount(insertAccount: InsertCanvasAccount): Promise<CanvasAccount>;
@@ -119,6 +127,41 @@ export class DatabaseStorage implements IStorage {
       .values(insertSession)
       .returning();
     return session;
+  }
+
+  // Canvas token methods
+  async getCanvasToken(userId: number): Promise<CanvasToken | undefined> {
+    const [token] = await db
+      .select()
+      .from(canvasTokens)
+      .where(eq(canvasTokens.userId, userId))
+      .limit(1);
+    return token;
+  }
+
+  async upsertCanvasToken(tokenData: InsertCanvasToken): Promise<CanvasToken> {
+    const [token] = await db
+      .insert(canvasTokens)
+      .values(tokenData)
+      .onConflictDoUpdate({
+        target: canvasTokens.userId,
+        set: {
+          accessToken: tokenData.accessToken,
+          refreshToken: tokenData.refreshToken,
+          expiresAt: tokenData.expiresAt,
+          scope: tokenData.scope,
+          tokenType: tokenData.tokenType,
+          updatedAt: new Date()
+        }
+      })
+      .returning();
+    return token;
+  }
+
+  async deleteCanvasToken(userId: number): Promise<void> {
+    await db
+      .delete(canvasTokens)
+      .where(eq(canvasTokens.userId, userId));
   }
 
   // Canvas account methods

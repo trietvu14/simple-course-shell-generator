@@ -5,6 +5,7 @@ import { z } from "zod";
 import { insertCreationBatchSchema, type User } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
+import { canvasOAuth } from "./canvas-oauth";
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
@@ -37,37 +38,28 @@ interface CanvasCourse {
   end_at?: string;
 }
 
-async function makeCanvasApiRequest(endpoint: string, options: RequestInit = {}) {
-  const { CANVAS_API_URL, CANVAS_API_TOKEN } = getCanvasConfig();
-  
+async function makeCanvasApiRequest(userId: number, endpoint: string, options: RequestInit = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   
   try {
-    const response = await fetch(`${CANVAS_API_URL}${endpoint}`, {
+    const response = await canvasOAuth.makeCanvasApiRequest(userId, endpoint, {
       ...options,
       signal: controller.signal,
-      headers: {
-        'Authorization': `Bearer ${CANVAS_API_TOKEN}`,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
     });
 
     clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`Canvas API error: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
+    return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    throw error;
+    if ((error as any).name === 'AbortError') {
+      throw new Error('Canvas API request timed out');
+    }
+    throw error as Error;
   }
 }
 
-async function fetchSubAccountsRecursively(accountId: string, depth: number = 0, maxDepth: number = 5): Promise<CanvasAccount[]> {
+async function fetchSubAccountsRecursively(userId: number, accountId: string, depth: number = 0, maxDepth: number = 5): Promise<CanvasAccount[]> {
   if (depth > maxDepth) {
     console.log(`Max depth ${maxDepth} reached for account ${accountId}, skipping`);
     return [];
@@ -77,7 +69,7 @@ async function fetchSubAccountsRecursively(accountId: string, depth: number = 0,
   const subAccounts: CanvasAccount[] = [];
   
   try {
-    const directSubAccounts = await makeCanvasApiRequest(`/accounts/${accountId}/sub_accounts`);
+    const directSubAccounts = await makeCanvasApiRequest(userId, `/accounts/${accountId}/sub_accounts`);
     console.log(`Found ${directSubAccounts.length} direct sub-accounts for account ${accountId}`);
     
     if (directSubAccounts.length > 0) {
@@ -85,7 +77,7 @@ async function fetchSubAccountsRecursively(accountId: string, depth: number = 0,
       
       // Recursively fetch sub-accounts of each sub-account
       for (const subAccount of directSubAccounts) {
-        const nestedSubAccounts = await fetchSubAccountsRecursively(subAccount.id, depth + 1, maxDepth);
+        const nestedSubAccounts = await fetchSubAccountsRecursively(userId, subAccount.id, depth + 1, maxDepth);
         subAccounts.push(...nestedSubAccounts);
       }
     }
@@ -96,19 +88,19 @@ async function fetchSubAccountsRecursively(accountId: string, depth: number = 0,
   return subAccounts;
 }
 
-async function getAllAccounts(): Promise<CanvasAccount[]> {
+async function getAllAccounts(userId: number): Promise<CanvasAccount[]> {
   console.log('Starting to fetch Canvas accounts...');
   const allAccounts: CanvasAccount[] = [];
   
   try {
     // Get root account first using the correct endpoint
     console.log('Fetching root account...');
-    const rootAccount = await makeCanvasApiRequest('/accounts/self');
+    const rootAccount = await makeCanvasApiRequest(userId, '/accounts/self');
     console.log('Root account fetched:', rootAccount.name, 'ID:', rootAccount.id);
     allAccounts.push(rootAccount);
     
     // Fetch all sub-accounts recursively
-    const subAccounts = await fetchSubAccountsRecursively(rootAccount.id);
+    const subAccounts = await fetchSubAccountsRecursively(userId, rootAccount.id);
     allAccounts.push(...subAccounts);
     
     console.log(`Total accounts fetched: ${allAccounts.length}`);
@@ -119,14 +111,14 @@ async function getAllAccounts(): Promise<CanvasAccount[]> {
   }
 }
 
-async function createCourseInCanvas(courseData: {
+async function createCourseInCanvas(userId: number, courseData: {
   name: string;
   course_code: string;
   account_id: string;
   start_at?: string;
   end_at?: string;
 }): Promise<CanvasCourse> {
-  return await makeCanvasApiRequest(`/accounts/${courseData.account_id}/courses`, {
+  return await makeCanvasApiRequest(userId, `/accounts/${courseData.account_id}/courses`, {
     method: 'POST',
     body: JSON.stringify({
       course: courseData,
@@ -142,7 +134,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test/canvas', async (req, res) => {
     try {
       console.log('Testing Canvas API...');
-      const rootAccount = await makeCanvasApiRequest('/accounts/self');
+      // For testing, we'll use a dummy user ID. In production, this should be authenticated
+      const testUserId = 1;
+      const rootAccount = await makeCanvasApiRequest(testUserId, '/accounts/self');
       res.json({ success: true, rootAccount });
     } catch (error) {
       console.error('Canvas API test failed:', error);
@@ -271,7 +265,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       console.log('Calling getAllAccounts...');
-      const accounts = await getAllAccounts();
+      const user = (req as AuthenticatedRequest).user;
+      const accounts = await getAllAccounts(user.id);
       
       console.log('Got accounts, storing in database...');
       // Store/update accounts in database
@@ -489,7 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           end_at: shell.endDate?.toISOString(),
         };
 
-        const createdCourse = await createCourseInCanvas(courseData);
+        const createdCourse = await createCourseInCanvas(shell.createdByUserId, courseData);
         
         await storage.updateCourseShell(shell.id, {
           status: 'created',

@@ -60,11 +60,24 @@ export const userSessions = pgTable("user_sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const canvasTokens = pgTable("canvas_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  scope: text("scope"),
+  tokenType: text("token_type").notNull().default("Bearer"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   courseShells: many(courseShells),
   creationBatches: many(creationBatches),
   userSessions: many(userSessions),
+  canvasTokens: many(canvasTokens),
 }));
 
 export const courseShellsRelations = relations(courseShells, ({ one }) => ({
@@ -84,6 +97,13 @@ export const creationBatchesRelations = relations(creationBatches, ({ one }) => 
 export const userSessionsRelations = relations(userSessions, ({ one }) => ({
   user: one(users, {
     fields: [userSessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const canvasTokensRelations = relations(canvasTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [canvasTokens.userId],
     references: [users.id],
   }),
 }));
@@ -118,6 +138,12 @@ export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
   createdAt: true,
 });
 
+export const insertCanvasTokenSchema = createInsertSchema(canvasTokens).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -129,3 +155,5 @@ export type CreationBatch = typeof creationBatches.$inferSelect;
 export type InsertCreationBatch = z.infer<typeof insertCreationBatchSchema>;
 export type UserSession = typeof userSessions.$inferSelect;
 export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type CanvasToken = typeof canvasTokens.$inferSelect;
+export type InsertCanvasToken = z.infer<typeof insertCanvasTokenSchema>;
