@@ -398,14 +398,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Exchange code for tokens
+      console.log('Exchanging Canvas OAuth code for tokens...');
       const tokenResponse = await canvasOAuth.exchangeCodeForToken(code as string);
+      console.log('Token exchange successful, expires_in:', tokenResponse.expires_in);
       
       // Store tokens in database for the default user (user ID 4 from logs)
       // In a production setup, you'd validate the state and associate with the proper user
       const defaultUserId = 4; // Using the user ID from the logs
-      await canvasOAuth.storeTokens(defaultUserId, tokenResponse);
+      const storedToken = await canvasOAuth.storeTokens(defaultUserId, tokenResponse);
       
-      console.log('Canvas OAuth tokens stored successfully for user:', defaultUserId);
+      console.log('Canvas OAuth tokens stored successfully for user:', defaultUserId, 'expires at:', storedToken.expiresAt);
       
       res.redirect('/?canvas_auth=success&message=oauth_configured');
     } catch (error) {
