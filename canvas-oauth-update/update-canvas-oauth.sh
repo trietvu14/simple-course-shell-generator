@@ -16,7 +16,7 @@ sudo systemctl stop canvas-course-generator.service
 
 # Copy new files
 echo "3. Copying updated files..."
-sudo cp -r ec2-production/* "$APP_DIR/"
+sudo cp -r . "$APP_DIR/" --exclude=*.sh --exclude=*.md
 
 # Update database schema
 echo "4. Updating database schema..."
