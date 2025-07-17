@@ -49,6 +49,9 @@ export interface IStorage {
   // Creation batch methods
   createCreationBatch(insertBatch: InsertCreationBatch): Promise<CreationBatch>;
   getCreationBatch(batchId: string): Promise<CreationBatch | undefined>;
+  getCreationBatchById(batchId: string): Promise<CreationBatch | undefined>;
+  getCreationBatchesByUserId(userId: number): Promise<CreationBatch[]>;
+  getCourseShellsByBatchId(batchId: string): Promise<CourseShell[]>;
   updateCreationBatch(batchId: string, updates: Partial<CreationBatch>): Promise<CreationBatch>;
   incrementBatchCompleted(batchId: string): Promise<void>;
   incrementBatchFailed(batchId: string): Promise<void>;
@@ -281,6 +284,32 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(creationBatches.batchId, batchId));
     }
+  }
+
+  async getCreationBatchById(batchId: string): Promise<CreationBatch | undefined> {
+    const [batch] = await db
+      .select()
+      .from(creationBatches)
+      .where(eq(creationBatches.batchId, batchId));
+    return batch || undefined;
+  }
+
+  async getCreationBatchesByUserId(userId: number): Promise<CreationBatch[]> {
+    const batches = await db
+      .select()
+      .from(creationBatches)
+      .where(eq(creationBatches.userId, userId))
+      .orderBy(desc(creationBatches.createdAt));
+    return batches;
+  }
+
+  async getCourseShellsByBatchId(batchId: string): Promise<CourseShell[]> {
+    const shells = await db
+      .select()
+      .from(courseShells)
+      .where(eq(courseShells.batchId, batchId))
+      .orderBy(courseShells.createdAt);
+    return shells;
   }
 
   async getRecentBatches(userId: number, limit: number): Promise<CreationBatch[]> {

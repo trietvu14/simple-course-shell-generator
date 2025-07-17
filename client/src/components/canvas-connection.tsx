@@ -28,6 +28,7 @@ export default function CanvasConnection() {
     queryKey: ["/api/canvas/oauth/status"],
     enabled: !!user,
     refetchInterval: 60000, // Check every minute
+    retry: false, // Don't retry on auth failures
   });
 
   // Mutation to revoke Canvas token
@@ -118,6 +119,58 @@ export default function CanvasConnection() {
     return <CheckCircle2 className="h-4 w-4 text-green-500" />;
   };
 
+  // Show the component only if we have a valid response (even if no token)
+  if (isLoading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5" />
+            Canvas Connection
+            <Badge variant="outline">Checking...</Badge>
+          </CardTitle>
+          <CardDescription>
+            Checking Canvas connection status...
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">
+              Loading connection status...
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If there's an auth error, show simplified message
+  if (error && error.message.includes('401')) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5" />
+            Canvas Connection
+            <Badge variant="outline">Setup Required</Badge>
+          </CardTitle>
+          <CardDescription>
+            Canvas OAuth setup is required for advanced token management
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-yellow-500" />
+            <span className="text-sm text-muted-foreground">
+              Canvas OAuth not configured. Using static API token.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -134,10 +187,8 @@ export default function CanvasConnection() {
         <div className="flex items-center gap-2">
           {getStatusIcon()}
           <span className="text-sm text-muted-foreground">
-            {isLoading ? (
-              "Checking connection status..."
-            ) : error ? (
-              "Error checking connection"
+            {error ? (
+              "Canvas OAuth not configured"
             ) : !tokenStatus?.hasToken ? (
               "Canvas not connected"
             ) : isTokenExpired(tokenStatus) ? (
