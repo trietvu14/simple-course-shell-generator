@@ -21,7 +21,7 @@ export class CanvasOAuthManager {
 
   constructor() {
     this.config = {
-      clientId: process.env.CANVAS_CLIENT_ID || '',
+      clientId: process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID || '',
       clientSecret: process.env.CANVAS_CLIENT_SECRET || '',
       canvasUrl: process.env.CANVAS_API_URL?.replace('/api/v1', '') || '',
       redirectUri: process.env.CANVAS_REDIRECT_URI || ''

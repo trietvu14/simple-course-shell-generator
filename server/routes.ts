@@ -50,7 +50,7 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
   try {
     // Try to get OAuth token first (only if Canvas OAuth is properly configured)
     let authHeader = '';
-    const hasOAuthConfig = process.env.CANVAS_CLIENT_ID && process.env.CANVAS_CLIENT_SECRET;
+    const hasOAuthConfig = (process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID) && process.env.CANVAS_CLIENT_SECRET;
     
     if (hasOAuthConfig) {
       try {
@@ -363,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/canvas/oauth/authorize', requireAuth, async (req: Request, res: Response) => {
     try {
       // Check if Canvas OAuth is configured
-      const hasOAuthConfig = process.env.CANVAS_CLIENT_ID && 
+      const hasOAuthConfig = (process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID) && 
                            process.env.CANVAS_CLIENT_SECRET && 
                            process.env.CANVAS_REDIRECT_URI &&
                            process.env.CANVAS_API_URL;
