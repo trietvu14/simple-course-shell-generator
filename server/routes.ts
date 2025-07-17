@@ -388,6 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Canvas OAuth callback - original path
   app.get('/api/canvas/oauth/callback', async (req: Request, res: Response) => {
     try {
       const { code, state } = req.query;

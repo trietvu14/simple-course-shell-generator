@@ -24,7 +24,7 @@ export class CanvasOAuthManager {
       clientId: process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID || '',
       clientSecret: process.env.CANVAS_CLIENT_SECRET || '',
       canvasUrl: process.env.CANVAS_API_URL?.replace('/api/v1', '') || '',
-      redirectUri: process.env.CANVAS_REDIRECT_URI || ''
+      redirectUri: process.env.CANVAS_REDIRECT_URI || 'https://shell.dpvils.org/api/canvas/oauth/callback'
     };
     
     console.log('Canvas OAuth initialized with config:', {
