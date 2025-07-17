@@ -7,6 +7,11 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+function getOktaUser() {
+  const user = localStorage.getItem('okta-user');
+  return user ? JSON.parse(user) : null;
+}
+
 function getAuthToken() {
   return localStorage.getItem('simple-auth-token');
 }
@@ -17,13 +22,16 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = getAuthToken();
+  const oktaUser = getOktaUser();
   const headers: Record<string, string> = {};
   
   if (data) {
     headers["Content-Type"] = "application/json";
   }
   
-  if (token) {
+  if (oktaUser) {
+    headers["x-okta-user"] = JSON.stringify(oktaUser);
+  } else if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
@@ -45,9 +53,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = getAuthToken();
+    const oktaUser = getOktaUser();
     const headers: Record<string, string> = {};
     
-    if (token) {
+    if (oktaUser) {
+      headers["x-okta-user"] = JSON.stringify(oktaUser);
+    } else if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 

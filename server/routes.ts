@@ -327,10 +327,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentication middleware - requires Bearer token
+  // Okta authentication callback endpoint
+  app.post('/api/auth/okta-callback', async (req: Request, res: Response) => {
+    try {
+      const { oktaId, email, firstName, lastName } = req.body;
+      
+      if (!oktaId || !email) {
+        return res.status(400).json({ message: 'Missing required user data' });
+      }
+      
+      // Create or update user in database
+      const user = await storage.upsertUser({
+        oktaId,
+        email,
+        firstName,
+        lastName,
+      });
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Okta callback error:', error);
+      res.status(500).json({ message: 'Failed to process Okta callback' });
+    }
+  });
+
+  // Authentication middleware - supports both Okta and simple auth
   const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+    const oktaUser = req.headers['x-okta-user'];
     
+    // Check for Okta authentication
+    if (oktaUser) {
+      try {
+        const userInfo = JSON.parse(oktaUser as string);
+        // Create/update user in database
+        const user = await storage.upsertUser({
+          oktaId: userInfo.sub,
+          email: userInfo.email,
+          firstName: userInfo.given_name,
+          lastName: userInfo.family_name,
+        });
+        
+        (req as AuthenticatedRequest).user = user;
+        return next();
+      } catch (error) {
+        return res.status(401).json({ message: 'Invalid Okta user data' });
+      }
+    }
+    
+    // Check for Bearer token (simple auth)
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Authentication required' });
     }
