@@ -82,7 +82,10 @@ export class CanvasOAuthManager {
       refresh_token: refreshToken
     });
 
-    const response = await fetch(`${this.config.canvasUrl}/login/oauth2/token`, {
+    const tokenUrl = `${this.config.canvasUrl}/login/oauth2/token`;
+    console.log('Refreshing Canvas token at:', tokenUrl);
+
+    const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
