@@ -7,8 +7,8 @@ import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
 import { CanvasOAuthManager } from "./canvas-oauth";
 
-// Initialize Canvas OAuth manager
-const canvasOAuth = new CanvasOAuthManager();
+// Initialize Canvas OAuth manager with storage instance
+const canvasOAuth = new CanvasOAuthManager(storage);
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
@@ -84,7 +84,6 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
       // If 401 and we have OAuth configured, try to refresh token
       if (response.status === 401 && hasOAuthConfig) {
         try {
-          await canvasOAuth.refreshToken(userId);
           const newToken = await canvasOAuth.getValidToken(userId);
           
           // Retry request with new token

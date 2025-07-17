@@ -1,6 +1,6 @@
 # Canvas OAuth Update - Ready for Production Deployment
 
-## ✅ Status: READY FOR DEPLOYMENT - FINAL CANVAS OAUTH FIX
+## ✅ Status: READY FOR DEPLOYMENT - CANVAS OAUTH STORAGE FIXED
 
 ### What's Fixed:
 1. **Canvas OAuth Callback Authentication** - Removed authentication requirement from callback endpoint
@@ -13,6 +13,8 @@
 8. **Storage Instance** - Fixed CanvasOAuthManager initialization with proper storage dependency
 9. **Constructor Fix** - Canvas OAuth manager now properly accepts storage instance in constructor
 10. **Production Ready** - All Canvas OAuth token storage issues resolved for production deployment
+11. **Routes Fix** - Fixed Canvas OAuth manager initialization in routes.ts with proper storage instance
+12. **Method Call Fix** - Fixed incorrect refreshToken method call in API request retry logic
 
 ### Files Updated:
 - `server/routes.ts` - Fixed callback endpoint authentication
