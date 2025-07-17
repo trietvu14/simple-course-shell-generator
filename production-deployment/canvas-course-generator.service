@@ -1,0 +1,18 @@
+[Unit]
+Description=Canvas Course Shell Generator - React
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/canvas-course-generator
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ubuntu/canvas-course-generator/.env
+ExecStart=/usr/bin/npm run dev
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
