@@ -48,13 +48,22 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   
   try {
-    // Try to get OAuth token first
+    // Try to get OAuth token first (only if Canvas OAuth is properly configured)
     let authHeader = '';
-    try {
-      const token = await canvasOAuth.getValidToken(userId);
-      authHeader = `Bearer ${token}`;
-    } catch (error) {
-      console.log('OAuth token not available, falling back to static token');
+    const hasOAuthConfig = process.env.CANVAS_CLIENT_ID && process.env.CANVAS_CLIENT_SECRET;
+    
+    if (hasOAuthConfig) {
+      try {
+        const token = await canvasOAuth.getValidToken(userId);
+        authHeader = `Bearer ${token}`;
+        console.log('Using Canvas OAuth token');
+      } catch (error) {
+        console.log('OAuth token not available, falling back to static token');
+        const { CANVAS_API_TOKEN } = getCanvasConfig();
+        authHeader = `Bearer ${CANVAS_API_TOKEN}`;
+      }
+    } else {
+      console.log('Using static Canvas API token');
       const { CANVAS_API_TOKEN } = getCanvasConfig();
       authHeader = `Bearer ${CANVAS_API_TOKEN}`;
     }
@@ -72,8 +81,8 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // If 401 and we have OAuth, try to refresh token
-      if (response.status === 401) {
+      // If 401 and we have OAuth configured, try to refresh token
+      if (response.status === 401 && hasOAuthConfig) {
         try {
           await canvasOAuth.refreshToken(userId);
           const newToken = await canvasOAuth.getValidToken(userId);
