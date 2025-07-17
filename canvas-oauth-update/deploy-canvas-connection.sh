@@ -91,3 +91,12 @@ else
 fi
 
 echo "=== Canvas Connection Deployment Complete ==="
+echo ""
+echo "🔧 To test Canvas OAuth on production:"
+echo "1. Make sure your production .env has:"
+echo "   CANVAS_CLIENT_ID=280980000000000004"
+echo "   CANVAS_CLIENT_SECRET=your_secret"
+echo "   CANVAS_REDIRECT_URI=https://shell.dpvils.org/api/canvas/oauth/callback"
+echo "   SESSION_SECRET=your_session_secret"
+echo ""
+echo "2. The Canvas connection button should now work without authentication errors"
