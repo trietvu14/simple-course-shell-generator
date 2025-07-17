@@ -1,0 +1,63 @@
+1. Testing Canvas OAuth authorization endpoint...
+Authorization endpoint status: 302
+
+2. Testing Canvas API with static token...
+Static token API status: 401
+
+3. Canvas API response with static token:
+{"errors":[{"message":"Invalid access token."}]}
+
+4. Testing Canvas OAuth token endpoint with client credentials...
+Token endpoint response:
+{"error":"invalid_request","error_description":"assertion method not supported for this grant_type"}Token endpoint status: 400
+
+5. Canvas OAuth configuration in current service logs...
+
+=== Diagnosis ===
+If static token works (200) but OAuth fails (400), the issue is likely:
+- Canvas developer key configuration
+- Client credentials mismatch
+- Developer key not properly activated
+
+Check Canvas developer key at:
+https://dppowerfullearning.instructure.com/accounts/1/developer_keys
+
+Verify:
+- Key is ON (not OFF)
+- Client ID: 280980000000000004
+- Redirect URI: https://shell.dpvils.org/api/canvas/oauth/callback
+- Scopes include account access
+ubuntu@ip-172-31-31-157:~/canvas-course-generator/canvas-oauth-update$ sudo systemctl restart canvas-course-generator
+ubuntu@ip-172-31-31-157:~/canvas-course-generator/canvas-oauth-update$ sudo ./test-canvas-oauth-direct.sh
+=== Testing Canvas OAuth Direct Connection ===
+
+1. Testing Canvas OAuth authorization endpoint...
+Authorization endpoint status: 302
+
+2. Testing Canvas API with static token...
+Static token API status: 401
+
+3. Canvas API response with static token:
+{"errors":[{"message":"Invalid access token."}]}
+
+4. Testing Canvas OAuth token endpoint with client credentials...
+Token endpoint response:
+{"error":"invalid_request","error_description":"assertion method not supported for this grant_type"}Token endpoint status: 400
+
+5. Canvas OAuth configuration in current service logs...
+Jul 17 18:37:44 ip-172-31-31-157 node[24045]: Canvas OAuth initialized with config: {
+
+=== Diagnosis ===
+If static token works (200) but OAuth fails (400), the issue is likely:
+- Canvas developer key configuration
+- Client credentials mismatch
+- Developer key not properly activated
+
+Check Canvas developer key at:
+https://dppowerfullearning.instructure.com/accounts/1/developer_keys
+
+Verify:
+- Key is ON (not OFF)
+- Client ID: 280980000000000004
+- Redirect URI: https://shell.dpvils.org/api/canvas/oauth/callback
+- Scopes include account access
