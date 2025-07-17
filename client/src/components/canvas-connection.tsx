@@ -64,13 +64,24 @@ export default function CanvasConnection() {
       
       // Redirect to Canvas OAuth authorization page
       window.location.href = data.authUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to start Canvas OAuth:", error);
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect to Canvas. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Check if it's a configuration error
+      if (error.message?.includes("Canvas OAuth is not configured") || 
+          error.message?.includes("400")) {
+        toast({
+          title: "Canvas OAuth Setup Required",
+          description: "Canvas OAuth is not configured. Please set up Canvas developer key and environment variables.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to Canvas. Please try again.",
+          variant: "destructive",
+        });
+      }
       setIsConnecting(false);
     }
   };
