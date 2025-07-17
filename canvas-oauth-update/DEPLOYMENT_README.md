@@ -31,11 +31,13 @@
    - Test OAuth flow
 
 ## What's New
-- Canvas OAuth 2.0 with automatic token refresh
-- Database schema for token storage
-- Enhanced error handling and security
-- Production-ready deployment scripts
-- Updated with 5-user authentication system:
+- **Canvas OAuth 2.0** with automatic token refresh
+- **Canvas Connection UI** - New "Connect Canvas" button and status display
+- **Token Status Display** - Shows expiry time and connection state
+- **Database schema** for token storage
+- **Enhanced error handling** and security
+- **Production-ready deployment scripts**
+- **Updated with 5-user authentication system**:
   - admin / DPVils25!
   - sbritwum / DPVils25!
   - acampbell / DPVils25!
