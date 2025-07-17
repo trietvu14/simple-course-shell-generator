@@ -18,7 +18,10 @@ This is a full-stack web application for creating Canvas course shells through a
 - **DEPLOYMENT PACKAGE**: Complete canvas-oauth-update deployment package ready for production
 - **GITHUB READY**: All Canvas OAuth features implemented and ready for version control
 - **CONSTRUCTOR FIXED**: Canvas OAuth manager now properly initialized with storage instance
+- **ROUTES INITIALIZATION**: Fixed Canvas OAuth manager initialization in routes.ts with proper storage dependency
+- **METHOD CALL FIXED**: Fixed incorrect refreshToken method call in API request retry logic
 - **FINAL DEPLOYMENT**: Canvas OAuth token storage completely fixed and ready for production
+- **GITHUB READY**: All Canvas OAuth fixes applied to working directory and ready for version control
 
 **July 16, 2025**
 - **REPLIT REACT APP WORKING**: Successfully implemented full React application with authentication
