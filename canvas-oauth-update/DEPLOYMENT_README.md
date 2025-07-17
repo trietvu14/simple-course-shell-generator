@@ -35,5 +35,11 @@
 - Database schema for token storage
 - Enhanced error handling and security
 - Production-ready deployment scripts
+- Updated with 5-user authentication system:
+  - admin / DPVils25!
+  - sbritwum / DPVils25!
+  - acampbell / DPVils25!
+  - ewest / DPVils25!
+  - mparkinson / DPVils25!
 
 Total package size: ~265KB (much smaller than full repository)

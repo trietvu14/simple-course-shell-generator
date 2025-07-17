@@ -5,7 +5,10 @@ import { z } from "zod";
 import { insertCreationBatchSchema, type User } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
-import { canvasOAuth } from "./canvas-oauth";
+import { CanvasOAuthManager } from "./canvas-oauth";
+
+// Initialize Canvas OAuth manager
+const canvasOAuth = new CanvasOAuthManager();
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
@@ -39,17 +42,64 @@ interface CanvasCourse {
 }
 
 async function makeCanvasApiRequest(userId: number, endpoint: string, options: RequestInit = {}) {
+  const { CANVAS_API_URL } = getCanvasConfig();
+  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   
   try {
-    const response = await canvasOAuth.makeCanvasApiRequest(userId, endpoint, {
+    // Try to get OAuth token first
+    let authHeader = '';
+    try {
+      const token = await canvasOAuth.getValidToken(userId);
+      authHeader = `Bearer ${token}`;
+    } catch (error) {
+      console.log('OAuth token not available, falling back to static token');
+      const { CANVAS_API_TOKEN } = getCanvasConfig();
+      authHeader = `Bearer ${CANVAS_API_TOKEN}`;
+    }
+    
+    const response = await fetch(`${CANVAS_API_URL}${endpoint}`, {
       ...options,
       signal: controller.signal,
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
     });
 
     clearTimeout(timeoutId);
-    return response;
+
+    if (!response.ok) {
+      // If 401 and we have OAuth, try to refresh token
+      if (response.status === 401) {
+        try {
+          await canvasOAuth.refreshToken(userId);
+          const newToken = await canvasOAuth.getValidToken(userId);
+          
+          // Retry request with new token
+          const retryResponse = await fetch(`${CANVAS_API_URL}${endpoint}`, {
+            ...options,
+            headers: {
+              'Authorization': `Bearer ${newToken}`,
+              'Content-Type': 'application/json',
+              ...options.headers,
+            },
+          });
+          
+          if (retryResponse.ok) {
+            return retryResponse.json();
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+        }
+      }
+      
+      throw new Error(`Canvas API error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   } catch (error) {
     clearTimeout(timeoutId);
     if ((error as any).name === 'AbortError') {
@@ -149,13 +199,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      if (username === 'admin' && password === 'P@ssword01') {
-        // Create or update user in database
-        const user = await storage.upsertUser({
+      // Define valid users
+      const validUsers = [
+        {
+          username: 'admin',
+          password: 'DPVils25!',
           oktaId: 'admin',
-          email: 'admin@digitalpromise.org',
+          email: 'tvu@digitalpromise.org',
           firstName: 'Admin',
           lastName: 'User'
+        },
+        {
+          username: 'sbritwum',
+          password: 'DPVils25!',
+          oktaId: 'sbritwum',
+          email: 'sbritwum@digitalpromise.org',
+          firstName: 'Shibrie',
+          lastName: 'Britwum'
+        },
+        {
+          username: 'acampbell',
+          password: 'DPVils25!',
+          oktaId: 'acampbell',
+          email: 'acampbell@digitalpromise.org',
+          firstName: 'Ashley',
+          lastName: 'Campbell'
+        },
+        {
+          username: 'ewest',
+          password: 'DPVils25!',
+          oktaId: 'ewest',
+          email: 'ewest@digitalpromise.org',
+          firstName: 'Erin',
+          lastName: 'West'
+        },
+        {
+          username: 'mparkinson',
+          password: 'DPVils25!',
+          oktaId: 'mparkinson',
+          email: 'mparkinson@digitalpromise.org',
+          firstName: 'Martika',
+          lastName: 'Parkinson'
+        }
+      ];
+      
+      // Find matching user
+      const matchedUser = validUsers.find(user => 
+        user.username === username && user.password === password
+      );
+      
+      if (matchedUser) {
+        // Create or update user in database
+        const user = await storage.upsertUser({
+          oktaId: matchedUser.oktaId,
+          email: matchedUser.email,
+          firstName: matchedUser.firstName,
+          lastName: matchedUser.lastName
         });
         
         // Create session token
@@ -250,6 +349,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: 'Authentication failed' });
     }
   };
+
+  // Canvas OAuth endpoints
+  app.get('/api/canvas/oauth/authorize', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const state = nanoid(16);
+      const authUrl = canvasOAuth.getAuthorizationUrl(state);
+      
+      // Store state in session for validation
+      req.session.canvasOAuthState = state;
+      
+      res.redirect(authUrl);
+    } catch (error) {
+      console.error('Canvas OAuth authorization error:', error);
+      res.status(500).json({ message: 'Failed to start Canvas authorization' });
+    }
+  });
+
+  app.get('/api/canvas/oauth/callback', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { code, state } = req.query;
+      const user = (req as AuthenticatedRequest).user;
+      
+      // Validate state parameter
+      if (state !== req.session.canvasOAuthState) {
+        return res.status(400).json({ message: 'Invalid state parameter' });
+      }
+      
+      // Exchange code for tokens
+      const tokenResponse = await canvasOAuth.exchangeCodeForToken(code as string);
+      
+      // Store tokens in database
+      await canvasOAuth.storeTokens(user.id, tokenResponse);
+      
+      // Clear state from session
+      delete req.session.canvasOAuthState;
+      
+      res.redirect('/?canvas_auth=success');
+    } catch (error) {
+      console.error('Canvas OAuth callback error:', error);
+      res.redirect('/?canvas_auth=error');
+    }
+  });
+
+  app.delete('/api/canvas/oauth/revoke', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as AuthenticatedRequest).user;
+      await canvasOAuth.revokeTokens(user.id);
+      res.json({ message: 'Canvas tokens revoked successfully' });
+    } catch (error) {
+      console.error('Canvas OAuth revoke error:', error);
+      res.status(500).json({ message: 'Failed to revoke Canvas tokens' });
+    }
+  });
+
+  app.get('/api/canvas/oauth/status', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as AuthenticatedRequest).user;
+      const token = await storage.getCanvasToken(user.id);
+      
+      res.json({
+        hasToken: !!token,
+        expiresAt: token?.expiresAt,
+        scope: token?.scope
+      });
+    } catch (error) {
+      console.error('Canvas OAuth status error:', error);
+      res.status(500).json({ message: 'Failed to get Canvas OAuth status' });
+    }
+  });
 
   // Get all Canvas accounts
   app.get('/api/accounts', requireAuth, async (req, res) => {
@@ -348,7 +516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdShells = await storage.createCourseShells(courseShellsToCreate);
 
       // Start async course creation process
-      createCoursesAsync(createdShells, batchId);
+      createCoursesAsync(createdShells, batchId, user.id);
 
       res.json({
         batchId,
@@ -361,119 +529,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get batch status
-  app.get('/api/batches/:batchId/status', requireAuth, async (req, res) => {
+  // Get creation batches for a user
+  app.get('/api/batches', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as AuthenticatedRequest).user;
+      const batches = await storage.getCreationBatchesByUserId(user.id);
+      res.json(batches);
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+      res.status(500).json({ message: 'Failed to fetch batches' });
+    }
+  });
+
+  // Get specific batch with its course shells
+  app.get('/api/batches/:batchId', requireAuth, async (req: Request, res: Response) => {
     try {
       const { batchId } = req.params;
-      const batch = await storage.getCreationBatch(batchId);
+      const user = (req as AuthenticatedRequest).user;
       
-      if (!batch) {
+      const batch = await storage.getCreationBatchById(batchId);
+      
+      if (!batch || batch.userId !== user.id) {
         return res.status(404).json({ message: 'Batch not found' });
       }
-
-      const shells = await storage.getCourseShellsByBatch(batchId);
+      
+      const courseShells = await storage.getCourseShellsByBatchId(batchId);
       
       res.json({
         batch,
-        shells,
+        courseShells,
       });
     } catch (error) {
-      console.error('Error fetching batch status:', error);
-      res.status(500).json({ message: 'Failed to fetch batch status' });
-    }
-  });
-
-  // Get user's recent activity
-  app.get('/api/recent-activity', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const user = (req as AuthenticatedRequest).user;
-      const batches = await storage.getRecentBatches(user.id, 10);
-      res.json(batches);
-    } catch (error) {
-      console.error('Error fetching recent activity:', error);
-      res.status(500).json({ message: 'Failed to fetch recent activity' });
-    }
-  });
-
-  // Okta user creation/login callback
-  app.post('/api/auth/okta-callback', async (req, res) => {
-    try {
-      const { oktaId, email, firstName, lastName } = req.body;
-      
-      if (!oktaId || !email) {
-        return res.status(400).json({ message: 'Missing required user information' });
-      }
-      
-      let user = await storage.getUserByOktaId(oktaId);
-      
-      if (!user) {
-        user = await storage.createUser({
-          oktaId,
-          email,
-          firstName: firstName || '',
-          lastName: lastName || '',
-        });
-      }
-
-      res.json(user);
-    } catch (error) {
-      console.error('Error in Okta callback:', error);
-      res.status(500).json({ message: 'Authentication failed' });
-    }
-  });
-
-  // Simple login with hardcoded credentials
-  app.post('/api/auth/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      // Hardcoded credentials for testing
-      const VALID_USERNAME = "admin";
-      const VALID_PASSWORD = "password123";
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
-      }
-      
-      if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      const testUser = {
-        oktaId: 'test-admin-id',
-        email: 'admin@powerfullearning.com',
-        firstName: 'Admin',
-        lastName: 'User',
-      };
-
-      let user = await storage.getUserByOktaId(testUser.oktaId);
-      
-      if (!user) {
-        user = await storage.createUser(testUser);
-      }
-
-      const sessionToken = nanoid();
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      await storage.createUserSession({
-        userId: user.id,
-        sessionToken,
-        expiresAt,
-      });
-
-      res.json({
-        user,
-        sessionToken,
-        expiresAt,
-      });
-    } catch (error) {
-      console.error('Error in login:', error);
-      res.status(500).json({ message: 'Login failed' });
+      console.error('Error fetching batch:', error);
+      res.status(500).json({ message: 'Failed to fetch batch' });
     }
   });
 
   // Async function to create courses in Canvas
-  async function createCoursesAsync(shells: any[], batchId: string) {
+  async function createCoursesAsync(shells: any[], batchId: string, userId: number) {
     for (const shell of shells) {
       try {
         const courseData = {
@@ -484,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           end_at: shell.endDate?.toISOString(),
         };
 
-        const createdCourse = await createCourseInCanvas(shell.createdByUserId, courseData);
+        const createdCourse = await createCourseInCanvas(userId, courseData);
         
         await storage.updateCourseShell(shell.id, {
           status: 'created',

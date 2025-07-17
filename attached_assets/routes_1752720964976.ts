@@ -5,10 +5,6 @@ import { z } from "zod";
 import { insertCreationBatchSchema, type User } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
-import { CanvasOAuthManager } from "./canvas-oauth";
-
-// Initialize Canvas OAuth manager
-const canvasOAuth = new CanvasOAuthManager();
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
@@ -41,29 +37,18 @@ interface CanvasCourse {
   end_at?: string;
 }
 
-async function makeCanvasApiRequest(userId: number, endpoint: string, options: RequestInit = {}) {
-  const { CANVAS_API_URL } = getCanvasConfig();
+async function makeCanvasApiRequest(endpoint: string, options: RequestInit = {}) {
+  const { CANVAS_API_URL, CANVAS_API_TOKEN } = getCanvasConfig();
   
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   
   try {
-    // Try to get OAuth token first
-    let authHeader = '';
-    try {
-      const token = await canvasOAuth.getValidToken(userId);
-      authHeader = `Bearer ${token}`;
-    } catch (error) {
-      console.log('OAuth token not available, falling back to static token');
-      const { CANVAS_API_TOKEN } = getCanvasConfig();
-      authHeader = `Bearer ${CANVAS_API_TOKEN}`;
-    }
-    
     const response = await fetch(`${CANVAS_API_URL}${endpoint}`, {
       ...options,
       signal: controller.signal,
       headers: {
-        'Authorization': authHeader,
+        'Authorization': `Bearer ${CANVAS_API_TOKEN}`,
         'Content-Type': 'application/json',
         ...options.headers,
       },
@@ -72,44 +57,17 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // If 401 and we have OAuth, try to refresh token
-      if (response.status === 401) {
-        try {
-          await canvasOAuth.refreshToken(userId);
-          const newToken = await canvasOAuth.getValidToken(userId);
-          
-          // Retry request with new token
-          const retryResponse = await fetch(`${CANVAS_API_URL}${endpoint}`, {
-            ...options,
-            headers: {
-              'Authorization': `Bearer ${newToken}`,
-              'Content-Type': 'application/json',
-              ...options.headers,
-            },
-          });
-          
-          if (retryResponse.ok) {
-            return retryResponse.json();
-          }
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
-        }
-      }
-      
       throw new Error(`Canvas API error: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
   } catch (error) {
     clearTimeout(timeoutId);
-    if ((error as any).name === 'AbortError') {
-      throw new Error('Canvas API request timed out');
-    }
-    throw error as Error;
+    throw error;
   }
 }
 
-async function fetchSubAccountsRecursively(userId: number, accountId: string, depth: number = 0, maxDepth: number = 5): Promise<CanvasAccount[]> {
+async function fetchSubAccountsRecursively(accountId: string, depth: number = 0, maxDepth: number = 5): Promise<CanvasAccount[]> {
   if (depth > maxDepth) {
     console.log(`Max depth ${maxDepth} reached for account ${accountId}, skipping`);
     return [];
@@ -119,7 +77,7 @@ async function fetchSubAccountsRecursively(userId: number, accountId: string, de
   const subAccounts: CanvasAccount[] = [];
   
   try {
-    const directSubAccounts = await makeCanvasApiRequest(userId, `/accounts/${accountId}/sub_accounts`);
+    const directSubAccounts = await makeCanvasApiRequest(`/accounts/${accountId}/sub_accounts`);
     console.log(`Found ${directSubAccounts.length} direct sub-accounts for account ${accountId}`);
     
     if (directSubAccounts.length > 0) {
@@ -127,7 +85,7 @@ async function fetchSubAccountsRecursively(userId: number, accountId: string, de
       
       // Recursively fetch sub-accounts of each sub-account
       for (const subAccount of directSubAccounts) {
-        const nestedSubAccounts = await fetchSubAccountsRecursively(userId, subAccount.id, depth + 1, maxDepth);
+        const nestedSubAccounts = await fetchSubAccountsRecursively(subAccount.id, depth + 1, maxDepth);
         subAccounts.push(...nestedSubAccounts);
       }
     }
@@ -138,19 +96,19 @@ async function fetchSubAccountsRecursively(userId: number, accountId: string, de
   return subAccounts;
 }
 
-async function getAllAccounts(userId: number): Promise<CanvasAccount[]> {
+async function getAllAccounts(): Promise<CanvasAccount[]> {
   console.log('Starting to fetch Canvas accounts...');
   const allAccounts: CanvasAccount[] = [];
   
   try {
     // Get root account first using the correct endpoint
     console.log('Fetching root account...');
-    const rootAccount = await makeCanvasApiRequest(userId, '/accounts/self');
+    const rootAccount = await makeCanvasApiRequest('/accounts/self');
     console.log('Root account fetched:', rootAccount.name, 'ID:', rootAccount.id);
     allAccounts.push(rootAccount);
     
     // Fetch all sub-accounts recursively
-    const subAccounts = await fetchSubAccountsRecursively(userId, rootAccount.id);
+    const subAccounts = await fetchSubAccountsRecursively(rootAccount.id);
     allAccounts.push(...subAccounts);
     
     console.log(`Total accounts fetched: ${allAccounts.length}`);
@@ -161,14 +119,14 @@ async function getAllAccounts(userId: number): Promise<CanvasAccount[]> {
   }
 }
 
-async function createCourseInCanvas(userId: number, courseData: {
+async function createCourseInCanvas(courseData: {
   name: string;
   course_code: string;
   account_id: string;
   start_at?: string;
   end_at?: string;
 }): Promise<CanvasCourse> {
-  return await makeCanvasApiRequest(userId, `/accounts/${courseData.account_id}/courses`, {
+  return await makeCanvasApiRequest(`/accounts/${courseData.account_id}/courses`, {
     method: 'POST',
     body: JSON.stringify({
       course: courseData,
@@ -184,9 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test/canvas', async (req, res) => {
     try {
       console.log('Testing Canvas API...');
-      // For testing, we'll use a dummy user ID. In production, this should be authenticated
-      const testUserId = 1;
-      const rootAccount = await makeCanvasApiRequest(testUserId, '/accounts/self');
+      const rootAccount = await makeCanvasApiRequest('/accounts/self');
       res.json({ success: true, rootAccount });
     } catch (error) {
       console.error('Canvas API test failed:', error);
@@ -350,75 +306,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // Canvas OAuth endpoints
-  app.get('/api/canvas/oauth/authorize', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const state = nanoid(16);
-      const authUrl = canvasOAuth.getAuthorizationUrl(state);
-      
-      // Store state in session for validation
-      req.session.canvasOAuthState = state;
-      
-      res.redirect(authUrl);
-    } catch (error) {
-      console.error('Canvas OAuth authorization error:', error);
-      res.status(500).json({ message: 'Failed to start Canvas authorization' });
-    }
-  });
-
-  app.get('/api/canvas/oauth/callback', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const { code, state } = req.query;
-      const user = (req as AuthenticatedRequest).user;
-      
-      // Validate state parameter
-      if (state !== req.session.canvasOAuthState) {
-        return res.status(400).json({ message: 'Invalid state parameter' });
-      }
-      
-      // Exchange code for tokens
-      const tokenResponse = await canvasOAuth.exchangeCodeForToken(code as string);
-      
-      // Store tokens in database
-      await canvasOAuth.storeTokens(user.id, tokenResponse);
-      
-      // Clear state from session
-      delete req.session.canvasOAuthState;
-      
-      res.redirect('/?canvas_auth=success');
-    } catch (error) {
-      console.error('Canvas OAuth callback error:', error);
-      res.redirect('/?canvas_auth=error');
-    }
-  });
-
-  app.delete('/api/canvas/oauth/revoke', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const user = (req as AuthenticatedRequest).user;
-      await canvasOAuth.revokeTokens(user.id);
-      res.json({ message: 'Canvas tokens revoked successfully' });
-    } catch (error) {
-      console.error('Canvas OAuth revoke error:', error);
-      res.status(500).json({ message: 'Failed to revoke Canvas tokens' });
-    }
-  });
-
-  app.get('/api/canvas/oauth/status', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const user = (req as AuthenticatedRequest).user;
-      const token = await storage.getCanvasToken(user.id);
-      
-      res.json({
-        hasToken: !!token,
-        expiresAt: token?.expiresAt,
-        scope: token?.scope
-      });
-    } catch (error) {
-      console.error('Canvas OAuth status error:', error);
-      res.status(500).json({ message: 'Failed to get Canvas OAuth status' });
-    }
-  });
-
   // Get all Canvas accounts
   app.get('/api/accounts', requireAuth, async (req, res) => {
     console.log('Accounts API called');
@@ -433,8 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       console.log('Calling getAllAccounts...');
-      const user = (req as AuthenticatedRequest).user;
-      const accounts = await getAllAccounts(user.id);
+      const accounts = await getAllAccounts();
       
       console.log('Got accounts, storing in database...');
       // Store/update accounts in database
@@ -516,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdShells = await storage.createCourseShells(courseShellsToCreate);
 
       // Start async course creation process
-      createCoursesAsync(createdShells, batchId, user.id);
+      createCoursesAsync(createdShells, batchId);
 
       res.json({
         batchId,
@@ -529,44 +415,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get creation batches for a user
-  app.get('/api/batches', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const user = (req as AuthenticatedRequest).user;
-      const batches = await storage.getCreationBatchesByUserId(user.id);
-      res.json(batches);
-    } catch (error) {
-      console.error('Error fetching batches:', error);
-      res.status(500).json({ message: 'Failed to fetch batches' });
-    }
-  });
-
-  // Get specific batch with its course shells
-  app.get('/api/batches/:batchId', requireAuth, async (req: Request, res: Response) => {
+  // Get batch status
+  app.get('/api/batches/:batchId/status', requireAuth, async (req, res) => {
     try {
       const { batchId } = req.params;
-      const user = (req as AuthenticatedRequest).user;
+      const batch = await storage.getCreationBatch(batchId);
       
-      const batch = await storage.getCreationBatchById(batchId);
-      
-      if (!batch || batch.userId !== user.id) {
+      if (!batch) {
         return res.status(404).json({ message: 'Batch not found' });
       }
-      
-      const courseShells = await storage.getCourseShellsByBatchId(batchId);
+
+      const shells = await storage.getCourseShellsByBatch(batchId);
       
       res.json({
         batch,
-        courseShells,
+        shells,
       });
     } catch (error) {
-      console.error('Error fetching batch:', error);
-      res.status(500).json({ message: 'Failed to fetch batch' });
+      console.error('Error fetching batch status:', error);
+      res.status(500).json({ message: 'Failed to fetch batch status' });
+    }
+  });
+
+  // Get user's recent activity
+  app.get('/api/recent-activity', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as AuthenticatedRequest).user;
+      const batches = await storage.getRecentBatches(user.id, 10);
+      res.json(batches);
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      res.status(500).json({ message: 'Failed to fetch recent activity' });
+    }
+  });
+
+  // Okta user creation/login callback
+  app.post('/api/auth/okta-callback', async (req, res) => {
+    try {
+      const { oktaId, email, firstName, lastName } = req.body;
+      
+      if (!oktaId || !email) {
+        return res.status(400).json({ message: 'Missing required user information' });
+      }
+      
+      let user = await storage.getUserByOktaId(oktaId);
+      
+      if (!user) {
+        user = await storage.createUser({
+          oktaId,
+          email,
+          firstName: firstName || '',
+          lastName: lastName || '',
+        });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('Error in Okta callback:', error);
+      res.status(500).json({ message: 'Authentication failed' });
+    }
+  });
+
+  // Simple login with hardcoded credentials
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Hardcoded credentials for testing
+      const VALID_USERNAME = "admin";
+      const VALID_PASSWORD = "password123";
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+      }
+      
+      if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const testUser = {
+        oktaId: 'test-admin-id',
+        email: 'admin@powerfullearning.com',
+        firstName: 'Admin',
+        lastName: 'User',
+      };
+
+      let user = await storage.getUserByOktaId(testUser.oktaId);
+      
+      if (!user) {
+        user = await storage.createUser(testUser);
+      }
+
+      const sessionToken = nanoid();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await storage.createUserSession({
+        userId: user.id,
+        sessionToken,
+        expiresAt,
+      });
+
+      res.json({
+        user,
+        sessionToken,
+        expiresAt,
+      });
+    } catch (error) {
+      console.error('Error in login:', error);
+      res.status(500).json({ message: 'Login failed' });
     }
   });
 
   // Async function to create courses in Canvas
-  async function createCoursesAsync(shells: any[], batchId: string, userId: number) {
+  async function createCoursesAsync(shells: any[], batchId: string) {
     for (const shell of shells) {
       try {
         const courseData = {
@@ -577,7 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           end_at: shell.endDate?.toISOString(),
         };
 
-        const createdCourse = await createCourseInCanvas(userId, courseData);
+        const createdCourse = await createCourseInCanvas(courseData);
         
         await storage.updateCourseShell(shell.id, {
           status: 'created',
