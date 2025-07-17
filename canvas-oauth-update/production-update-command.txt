@@ -1,0 +1,18 @@
+# Production Update Commands
+
+## SSH to production and update Canvas API token:
+
+ssh ubuntu@shell.dpvils.org
+sudo nano /home/ubuntu/canvas-course-generator/.env
+
+# Replace this line:
+CANVAS_API_TOKEN=28098~rvMvz2ZRQyCXPrQPHeREnyvZhcuM22yKF8Bh3vKYJUkmQhTkwfKTRMm7UTWDe7mG
+
+# With this line:
+CANVAS_API_TOKEN=28098~wGWDBE9TwITEP0oYNE4L6WKqJKKfZ6lSsxMzCbG7lIZfWjYFqyMymAzE3HK
+
+# Save and restart service:
+sudo systemctl restart canvas-course-generator.service
+
+# Verify service is running:
+sudo systemctl status canvas-course-generator.service
