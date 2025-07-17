@@ -54,10 +54,24 @@ export default function CanvasConnection() {
     },
   });
 
-  const handleConnectCanvas = () => {
+  const handleConnectCanvas = async () => {
     setIsConnecting(true);
-    // Redirect to Canvas OAuth authorization
-    window.location.href = "/api/canvas/oauth/authorize";
+    try {
+      // Get authorization URL from authenticated API call
+      const response = await apiRequest("GET", "/api/canvas/oauth/authorize");
+      const data = await response.json();
+      
+      // Redirect to Canvas OAuth authorization page
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error("Failed to start Canvas OAuth:", error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to Canvas. Please try again.",
+        variant: "destructive",
+      });
+      setIsConnecting(false);
+    }
   };
 
   const handleDisconnectCanvas = () => {

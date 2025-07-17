@@ -368,7 +368,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store state in session for validation
       req.session.canvasOAuthState = state;
       
-      res.redirect(authUrl);
+      // Return the authorization URL as JSON instead of redirecting
+      res.json({ authUrl });
     } catch (error) {
       console.error('Canvas OAuth authorization error:', error);
       res.status(500).json({ message: 'Failed to start Canvas authorization' });
