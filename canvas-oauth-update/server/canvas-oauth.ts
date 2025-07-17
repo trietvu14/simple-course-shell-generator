@@ -19,13 +19,19 @@ interface CanvasTokenResponse {
 export class CanvasOAuthManager {
   private config: CanvasOAuthConfig;
 
-  constructor() {
+  constructor(private storage: typeof storage) {
     this.config = {
       clientId: process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID || '',
       clientSecret: process.env.CANVAS_CLIENT_SECRET || '',
       canvasUrl: process.env.CANVAS_API_URL?.replace('/api/v1', '') || '',
       redirectUri: process.env.CANVAS_REDIRECT_URI || ''
     };
+    
+    console.log('Canvas OAuth initialized with config:', {
+      clientId: this.config.clientId,
+      canvasUrl: this.config.canvasUrl,
+      redirectUri: this.config.redirectUri
+    });
   }
 
   /**
