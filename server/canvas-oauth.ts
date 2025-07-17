@@ -113,17 +113,20 @@ export class CanvasOAuthManager {
       refreshToken: tokenResponse.refresh_token,
       expiresAt,
       scope: tokenResponse.scope,
-      tokenType: tokenResponse.token_type
+      tokenType: tokenResponse.token_type || 'Bearer'
     };
 
-    return await storage.upsertCanvasToken(tokenData);
+    console.log('Storing Canvas tokens for user:', userId, 'expires at:', expiresAt);
+    const storedToken = await this.storage.upsertCanvasToken(tokenData);
+    console.log('Canvas tokens stored successfully:', storedToken.id);
+    return storedToken;
   }
 
   /**
    * Get valid Canvas access token for a user (refresh if needed)
    */
   async getValidToken(userId: number): Promise<string> {
-    const canvasToken = await storage.getCanvasToken(userId);
+    const canvasToken = await this.storage.getCanvasToken(userId);
     
     if (!canvasToken) {
       throw new Error('No Canvas token found for user. Please authorize Canvas access.');
@@ -143,6 +146,8 @@ export class CanvasOAuthManager {
         return updatedToken.accessToken;
       } catch (error) {
         console.error('Failed to refresh Canvas token:', error);
+        // Remove invalid token
+        await this.storage.deleteCanvasToken(userId);
         throw new Error('Canvas token refresh failed. Please re-authorize Canvas access.');
       }
     }
