@@ -22,6 +22,9 @@ This is a full-stack web application for creating Canvas course shells through a
 - **METHOD CALL FIXED**: Fixed incorrect refreshToken method call in API request retry logic
 - **FINAL DEPLOYMENT**: Canvas OAuth token storage completely fixed and ready for production
 - **GITHUB READY**: All Canvas OAuth fixes applied to working directory and ready for version control
+- **SYSTEMD FIXED**: Fixed systemd service to properly load .env file with Canvas OAuth variables
+- **ENVIRONMENT LOADED**: Canvas OAuth configuration now properly loaded in production environment
+- **CANVAS API ISSUE**: Token refresh failing with 400 invalid_client - Canvas developer key needs verification
 
 **July 16, 2025**
 - **REPLIT REACT APP WORKING**: Successfully implemented full React application with authentication
