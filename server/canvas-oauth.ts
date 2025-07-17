@@ -182,7 +182,8 @@ export class CanvasOAuthManager {
    * Revoke Canvas tokens for a user
    */
   async revokeTokens(userId: number): Promise<void> {
-    const canvasToken = await storage.getCanvasToken(userId);
+    console.log('Revoking Canvas tokens for user:', userId);
+    const canvasToken = await this.storage.getCanvasToken(userId);
     
     if (canvasToken) {
       try {
@@ -198,9 +199,9 @@ export class CanvasOAuthManager {
       }
       
       // Remove token from database
-      await storage.deleteCanvasToken(userId);
+      await this.storage.deleteCanvasToken(userId);
     }
   }
 }
 
-export const canvasOAuth = new CanvasOAuthManager();
+export const canvasOAuth = new CanvasOAuthManager(storage);

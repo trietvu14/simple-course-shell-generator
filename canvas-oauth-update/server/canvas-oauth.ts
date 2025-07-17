@@ -113,10 +113,13 @@ export class CanvasOAuthManager {
       refreshToken: tokenResponse.refresh_token,
       expiresAt,
       scope: tokenResponse.scope,
-      tokenType: tokenResponse.token_type
+      tokenType: tokenResponse.token_type || 'Bearer'
     };
 
-    return await storage.upsertCanvasToken(tokenData);
+    console.log('Storing Canvas tokens for user:', userId, 'expires at:', expiresAt);
+    const storedToken = await this.storage.upsertCanvasToken(tokenData);
+    console.log('Canvas tokens stored successfully:', storedToken.id);
+    return storedToken;
   }
 
   /**
@@ -198,4 +201,4 @@ export class CanvasOAuthManager {
   }
 }
 
-export const canvasOAuth = new CanvasOAuthManager();
+export const canvasOAuth = new CanvasOAuthManager(storage);
