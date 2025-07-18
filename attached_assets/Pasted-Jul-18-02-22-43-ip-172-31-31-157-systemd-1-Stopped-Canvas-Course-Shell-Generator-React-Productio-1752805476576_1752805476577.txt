@@ -1,0 +1,17 @@
+Jul 18 02:22:43 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator - React Production.
+Jul 18 02:22:43 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator - React Production.
+Jul 18 02:22:43 ip-172-31-31-157 node[5812]: Static files served from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:22:43 ip-172-31-31-157 node[5812]: ✓ Canvas Course Shell Generator running on port 5000
+Jul 18 02:22:43 ip-172-31-31-157 node[5812]: ✓ Environment: production
+Jul 18 02:22:43 ip-172-31-31-157 node[5812]: ✓ Serving React app from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:22:43 ip-172-31-31-157 node[5812]: ✓ Started at: 2025-07-18T02:22:43.512Z
+Jul 18 02:22:53 ip-172-31-31-157 node[5812]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:23:11 ip-172-31-31-157 systemd[1]: Stopping Canvas Course Shell Generator - React Production...
+Jul 18 02:23:11 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Deactivated successfully.
+Jul 18 02:23:11 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator - React Production.
+Jul 18 02:23:11 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator - React Production.
+Jul 18 02:23:11 ip-172-31-31-157 node[5840]: Static files served from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:23:11 ip-172-31-31-157 node[5840]: ✓ Canvas Course Shell Generator running on port 5000
+Jul 18 02:23:11 ip-172-31-31-157 node[5840]: ✓ Environment: production
+Jul 18 02:23:11 ip-172-31-31-157 node[5840]: ✓ Serving React app from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:23:11 ip-172-31-31-157 node[5840]: ✓ Started at: 2025-07-18T02:23:11.249Z
+Jul 18 02:23:15 ip-172-31-31-157 node[5840]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:23:15 ip-172-31-31-157 node[5840]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:23:56 ip-172-31-31-157 node[5840]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>lines 1-20/20 (END)
