@@ -1,78 +1,40 @@
-# Production Deployment Instructions
+# Canvas Course Shell Generator - Complete Deployment
 
-## Quick Start
+## Current Status
+- Test page is running at shell.dpvils.org
+- Need to deploy complete Canvas Course Shell Generator application
 
-1. **Upload this entire directory** to your production server
-2. **Run the deployment script**: `./deploy-clean-okta-final.sh`
-3. **Configure environment**: Update `.env` with your actual tokens
-4. **Restart service**: `sudo systemctl restart canvas-course-generator.service`
-5. **Test**: Visit https://shell.dpvils.org
+## Deployment Steps
 
-## What This Deployment Includes
-
-### ✅ Fixes Applied
-- **OAuth Error Fixed**: Removed conflicting simple authentication
-- **404 Error Fixed**: Proper production build configuration
-- **Clean Authentication**: Only Okta authentication, no mixed systems
-- **Production Ready**: Built with `npm run build` for production serving
-
-### 📦 Package Contents
-- `deploy-clean-okta-final.sh` - Main deployment script
-- `post-deployment-test.sh` - Testing script
-- `README-DEPLOYMENT.md` - Detailed documentation
-- Complete application source code (client/, server/, shared/)
-- Production configuration files
-
-### 🔧 Key Changes
-- Removed all simple authentication code
-- Simplified authentication middleware to Okta-only
-- Disabled Canvas OAuth to prevent conflicts
-- Configured proper production build process
-
-## Expected Results
-
-After deployment:
-- **Service Status**: Running with production build
-- **Authentication**: Digital Promise Okta SSO working
-- **Application**: No 404 errors, proper React routing
-- **Canvas API**: Working with personal access token
-- **Performance**: Optimized production build
-
-## Commands to Run
-
+### 1. Run the deployment script
 ```bash
-# 1. Deploy application
-./deploy-clean-okta-final.sh
-
-# 2. Test deployment
-./post-deployment-test.sh
-
-# 3. Monitor logs
-sudo journalctl -u canvas-course-generator.service -f
-
-# 4. Check service status
-sudo systemctl status canvas-course-generator.service
+./deploy-complete-canvas-app.sh
 ```
 
-## Environment Variables to Configure
+### 2. What this script does
+- Stops the current service
+- Replaces the test page with the complete Canvas application
+- Updates server configuration with full API endpoints
+- Restarts the service with complete functionality
 
-Update `/home/ubuntu/canvas-course-generator/.env`:
+### 3. What files get updated
+- `dist/public/index.html` - Complete Canvas Course Shell Generator interface
+- `production-react-server.js` - Server with Canvas API endpoints
 
-```bash
-# Replace with your actual Canvas API token
-CANVAS_API_TOKEN=your_actual_canvas_token
+### 4. What files remain unchanged
+- `.env` - Environment variables and secrets
+- Systemd service configuration
+- Nginx configuration
+- SSL certificates
+- All other configuration files
 
-# Replace with your actual database URL
-DATABASE_URL=your_actual_database_url
-```
+### 5. Expected result
+After deployment, https://shell.dpvils.org will show:
+- Complete Canvas Course Shell Generator dashboard
+- Digital Promise authentication
+- Course creation forms and tools
+- Canvas account selection interface
+- Progress tracking and status updates
 
-## Verification Checklist
-
-- [ ] Service is running: `sudo systemctl is-active canvas-course-generator.service`
-- [ ] Build directory exists: `ls -la /home/ubuntu/canvas-course-generator/dist/`
-- [ ] Environment configured: `cat /home/ubuntu/canvas-course-generator/.env`
-- [ ] External access works: `curl https://shell.dpvils.org/health`
-- [ ] Okta redirect works: Visit https://shell.dpvils.org in browser
-- [ ] Canvas API works: Test in dashboard after login
-
-This deployment resolves all authentication conflicts and provides a clean, production-ready Canvas Course Shell Generator.
+## No directory replacement needed
+The script works within your existing directory structure and only updates the necessary application files.
