@@ -5,7 +5,7 @@ import AccountSelection from "@/components/account-selection";
 import CourseShellForm from "@/components/course-shell-form";
 import ProgressModal from "@/components/progress-modal";
 import RecentActivity from "@/components/recent-activity";
-
+import CanvasConnection from "@/components/canvas-connection";
 
 import { useAuth } from "@/lib/auth-context";
 import { useSimpleAuth } from "@/lib/simple-auth-context";
@@ -40,8 +40,11 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Account Selection */}
+          {/* Left Column - Account Selection & Canvas Connection */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Canvas Connection */}
+            <CanvasConnection />
+            
             {/* Account Selection */}
             <AccountSelection
               selectedAccounts={selectedAccounts}
