@@ -185,32 +185,6 @@ async function createCourseInCanvas(userId: number, courseData: {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication middleware - Okta only
-  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const oktaUser = req.headers['x-okta-user'];
-    
-    // Check for Okta authentication
-    if (oktaUser) {
-      try {
-        const userInfo = JSON.parse(oktaUser as string);
-        // Create/update user in database
-        const user = await storage.upsertUser({
-          oktaId: userInfo.sub,
-          email: userInfo.email,
-          firstName: userInfo.given_name,
-          lastName: userInfo.family_name,
-        });
-        
-        (req as AuthenticatedRequest).user = user;
-        return next();
-      } catch (error) {
-        return res.status(401).json({ message: 'Invalid Okta user data' });
-      }
-    }
-    
-    return res.status(401).json({ message: 'Okta authentication required' });
-  };
-
   // Health check endpoint
   app.get('/health', healthCheck);
   
@@ -228,16 +202,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint (Okta only)
-  app.get('/api/auth/user', requireAuth, async (req: Request, res: Response) => {
-    const user = (req as AuthenticatedRequest).user;
+  // Simple authentication endpoints
+  app.post('/api/auth/simple-login', async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Define valid users
+      const validUsers = [
+        {
+          username: 'admin',
+          password: 'DPVils25!',
+          oktaId: 'admin',
+          email: 'tvu@digitalpromise.org',
+          firstName: 'Admin',
+          lastName: 'User'
+        },
+        {
+          username: 'sbritwum',
+          password: 'DPVils25!',
+          oktaId: 'sbritwum',
+          email: 'sbritwum@digitalpromise.org',
+          firstName: 'Shibrie',
+          lastName: 'Britwum'
+        },
+        {
+          username: 'acampbell',
+          password: 'DPVils25!',
+          oktaId: 'acampbell',
+          email: 'acampbell@digitalpromise.org',
+          firstName: 'Ashley',
+          lastName: 'Campbell'
+        },
+        {
+          username: 'ewest',
+          password: 'DPVils25!',
+          oktaId: 'ewest',
+          email: 'ewest@digitalpromise.org',
+          firstName: 'Erin',
+          lastName: 'West'
+        },
+        {
+          username: 'mparkinson',
+          password: 'DPVils25!',
+          oktaId: 'mparkinson',
+          email: 'mparkinson@digitalpromise.org',
+          firstName: 'Martika',
+          lastName: 'Parkinson'
+        }
+      ];
+      
+      // Find matching user
+      const matchedUser = validUsers.find(user => 
+        user.username === username && user.password === password
+      );
+      
+      if (matchedUser) {
+        // Create or update user in database
+        const user = await storage.upsertUser({
+          oktaId: matchedUser.oktaId,
+          email: matchedUser.email,
+          firstName: matchedUser.firstName,
+          lastName: matchedUser.lastName
+        });
+        
+        // Create session token
+        const sessionToken = nanoid();
+        await storage.createUserSession({
+          userId: user.id,
+          sessionToken: sessionToken,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        });
+        
+        res.json({
+          success: true,
+          token: sessionToken,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error("Error in simple login:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Get current user endpoint
+  app.get('/api/auth/user', async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
     
-    res.json({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
-    });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    try {
+      const session = await storage.getUserSessionByToken(token);
+      
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+      }
+      
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ message: 'Failed to get user' });
+    }
   });
 
   // Okta authentication callback endpoint
@@ -263,6 +350,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to process Okta callback' });
     }
   });
+
+  // Authentication middleware - Okta only
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const oktaUser = req.headers['x-okta-user'];
+    
+    // Check for Okta authentication
+    if (oktaUser) {
+      try {
+        const userInfo = JSON.parse(oktaUser as string);
+        // Create/update user in database
+        const user = await storage.upsertUser({
+          oktaId: userInfo.sub,
+          email: userInfo.email,
+          firstName: userInfo.given_name,
+          lastName: userInfo.family_name,
+        });
+        
+        (req as AuthenticatedRequest).user = user;
+        return next();
+      } catch (error) {
+        return res.status(401).json({ message: 'Invalid Okta user data' });
+      }
+    }
+    
+    return res.status(401).json({ message: 'Okta authentication required' });
+  };
+      
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      
+      (req as AuthenticatedRequest).user = user;
+      next();
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
+  };
 
   // Canvas OAuth endpoints
   app.get('/api/canvas/oauth/authorize', requireAuth, async (req: Request, res: Response) => {

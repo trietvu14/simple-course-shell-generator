@@ -6,16 +6,6 @@ This is a full-stack web application for creating Canvas course shells through a
 
 ## Recent Changes
 
-**July 18, 2025**
-- **CLEAN OKTA AUTHENTICATION**: Completely removed simple authentication system, using only Okta authentication
-- **PRODUCTION 404 FIX**: Created comprehensive fix for production 404 errors (running dev instead of production build)
-- **AUTHENTICATION SIMPLIFIED**: Removed all simple auth complexity, clean Okta-only implementation
-- **OAUTH ERROR RESOLVED**: Fixed client authentication errors by removing mixed authentication systems
-- **DEPLOYMENT PACKAGES**: Created multiple deployment packages addressing production issues
-- **CLEAN CODEBASE**: Removed all simple auth references from frontend and backend code
-- **MIDDLEWARE CLEANUP**: Simplified authentication middleware to only handle Okta authentication
-- **PRODUCTION READY**: Clean deployment package ready for production with proper build process
-
 **July 17, 2025**
 - **CANVAS OAUTH COMPLETE**: Full Canvas OAuth 2.0 integration working end-to-end
 - **TOKEN STORAGE**: OAuth tokens properly stored in database after authorization
@@ -108,10 +98,9 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Authentication System
-- **Pure Okta Integration**: Clean Single Sign-On authentication with Digital Promise Okta (simple auth removed)
+- **Okta Integration**: Full Single Sign-On authentication with Digital Promise Okta
 - **Session Management**: Okta-managed authentication with automatic token refresh
 - **User Storage**: Database-backed user management with Okta ID mapping
-- **Simplified Middleware**: Clean authentication middleware handling only Okta authentication
 
 ### Canvas Integration
 - **OAuth Authentication**: Complete OAuth 2.0 flow with Canvas for secure API access

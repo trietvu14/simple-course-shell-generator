@@ -1,0 +1,19 @@
+{
+  "name": "canvas-course-generator",
+  "version": "1.0.0",
+  "description": "Canvas Course Shell Generator - Simplified",
+  "main": "simple-server.js",
+  "scripts": {
+    "start": "node simple-server.js",
+    "dev": "node simple-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
