@@ -7,8 +7,8 @@ import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
 import { CanvasOAuthManager } from "./canvas-oauth";
 
-// Initialize Canvas OAuth manager with storage instance
-const canvasOAuth = new CanvasOAuthManager(storage);
+// Initialize Canvas OAuth manager
+const canvasOAuth = new CanvasOAuthManager();
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
@@ -48,22 +48,13 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   
   try {
-    // Try to get OAuth token first (only if Canvas OAuth is properly configured)
+    // Try to get OAuth token first
     let authHeader = '';
-    const hasOAuthConfig = (process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID) && process.env.CANVAS_CLIENT_SECRET;
-    
-    if (hasOAuthConfig) {
-      try {
-        const token = await canvasOAuth.getValidToken(userId);
-        authHeader = `Bearer ${token}`;
-        console.log('Using Canvas OAuth token');
-      } catch (error) {
-        console.log('OAuth token not available, falling back to static token');
-        const { CANVAS_API_TOKEN } = getCanvasConfig();
-        authHeader = `Bearer ${CANVAS_API_TOKEN}`;
-      }
-    } else {
-      console.log('Using static Canvas API token');
+    try {
+      const token = await canvasOAuth.getValidToken(userId);
+      authHeader = `Bearer ${token}`;
+    } catch (error) {
+      console.log('OAuth token not available, falling back to static token');
       const { CANVAS_API_TOKEN } = getCanvasConfig();
       authHeader = `Bearer ${CANVAS_API_TOKEN}`;
     }
@@ -81,9 +72,10 @@ async function makeCanvasApiRequest(userId: number, endpoint: string, options: R
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // If 401 and we have OAuth configured, try to refresh token
-      if (response.status === 401 && hasOAuthConfig) {
+      // If 401 and we have OAuth, try to refresh token
+      if (response.status === 401) {
         try {
+          await canvasOAuth.refreshToken(userId);
           const newToken = await canvasOAuth.getValidToken(userId);
           
           // Retry request with new token
@@ -185,32 +177,6 @@ async function createCourseInCanvas(userId: number, courseData: {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication middleware - Okta only
-  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const oktaUser = req.headers['x-okta-user'];
-    
-    // Check for Okta authentication
-    if (oktaUser) {
-      try {
-        const userInfo = JSON.parse(oktaUser as string);
-        // Create/update user in database
-        const user = await storage.upsertUser({
-          oktaId: userInfo.sub,
-          email: userInfo.email,
-          firstName: userInfo.given_name,
-          lastName: userInfo.family_name,
-        });
-        
-        (req as AuthenticatedRequest).user = user;
-        return next();
-      } catch (error) {
-        return res.status(401).json({ message: 'Invalid Okta user data' });
-      }
-    }
-    
-    return res.status(401).json({ message: 'Okta authentication required' });
-  };
-
   // Health check endpoint
   app.get('/health', healthCheck);
   
@@ -228,97 +194,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint (Okta only)
-  app.get('/api/auth/user', requireAuth, async (req: Request, res: Response) => {
-    const user = (req as AuthenticatedRequest).user;
-    
-    res.json({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
-    });
-  });
-
-  // Okta authentication callback endpoint
-  app.post('/api/auth/okta-callback', async (req: Request, res: Response) => {
+  // Simple authentication endpoints
+  app.post('/api/auth/simple-login', async (req: Request, res: Response) => {
     try {
-      const { oktaId, email, firstName, lastName } = req.body;
+      const { username, password } = req.body;
       
-      if (!oktaId || !email) {
-        return res.status(400).json({ message: 'Missing required user data' });
+      // Define valid users
+      const validUsers = [
+        {
+          username: 'admin',
+          password: 'DPVils25!',
+          oktaId: 'admin',
+          email: 'tvu@digitalpromise.org',
+          firstName: 'Admin',
+          lastName: 'User'
+        },
+        {
+          username: 'sbritwum',
+          password: 'DPVils25!',
+          oktaId: 'sbritwum',
+          email: 'sbritwum@digitalpromise.org',
+          firstName: 'Shibrie',
+          lastName: 'Britwum'
+        },
+        {
+          username: 'acampbell',
+          password: 'DPVils25!',
+          oktaId: 'acampbell',
+          email: 'acampbell@digitalpromise.org',
+          firstName: 'Ashley',
+          lastName: 'Campbell'
+        },
+        {
+          username: 'ewest',
+          password: 'DPVils25!',
+          oktaId: 'ewest',
+          email: 'ewest@digitalpromise.org',
+          firstName: 'Erin',
+          lastName: 'West'
+        },
+        {
+          username: 'mparkinson',
+          password: 'DPVils25!',
+          oktaId: 'mparkinson',
+          email: 'mparkinson@digitalpromise.org',
+          firstName: 'Martika',
+          lastName: 'Parkinson'
+        }
+      ];
+      
+      // Find matching user
+      const matchedUser = validUsers.find(user => 
+        user.username === username && user.password === password
+      );
+      
+      if (matchedUser) {
+        // Create or update user in database
+        const user = await storage.upsertUser({
+          oktaId: matchedUser.oktaId,
+          email: matchedUser.email,
+          firstName: matchedUser.firstName,
+          lastName: matchedUser.lastName
+        });
+        
+        // Create session token
+        const sessionToken = nanoid();
+        await storage.createUserSession({
+          userId: user.id,
+          sessionToken: sessionToken,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        });
+        
+        res.json({
+          success: true,
+          token: sessionToken,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
       }
-      
-      // Create or update user in database
-      const user = await storage.upsertUser({
-        oktaId,
-        email,
-        firstName,
-        lastName,
-      });
-      
-      res.json(user);
     } catch (error) {
-      console.error('Okta callback error:', error);
-      res.status(500).json({ message: 'Failed to process Okta callback' });
+      console.error("Error in simple login:", error);
+      res.status(500).json({ message: "Login failed" });
     }
   });
+
+  // Get current user endpoint
+  app.get('/api/auth/user', async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    try {
+      const session = await storage.getUserSessionByToken(token);
+      
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+      }
+      
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ message: 'Failed to get user' });
+    }
+  });
+
+  // Authentication middleware - requires Bearer token
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    try {
+      const session = await storage.getUserSessionByToken(token);
+      
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+      }
+      
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      
+      (req as AuthenticatedRequest).user = user;
+      next();
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
+  };
 
   // Canvas OAuth endpoints
   app.get('/api/canvas/oauth/authorize', requireAuth, async (req: Request, res: Response) => {
     try {
-      // Check if Canvas OAuth is configured
-      const hasOAuthConfig = (process.env.CANVAS_CLIENT_ID || process.env.CANVAS_CLIENT_KEY_ID) && 
-                           process.env.CANVAS_CLIENT_SECRET && 
-                           process.env.CANVAS_REDIRECT_URI &&
-                           process.env.CANVAS_API_URL;
-      
-      if (!hasOAuthConfig) {
-        return res.status(400).json({ 
-          message: 'Canvas OAuth is not configured. Please set up Canvas developer key and environment variables.',
-          configRequired: true
-        });
-      }
-      
       const state = nanoid(16);
       const authUrl = canvasOAuth.getAuthorizationUrl(state);
       
-      // TODO: Store state in session for validation when sessions are configured
-      // For now, we'll skip state validation as Canvas OAuth env vars aren't configured anyway
+      // Store state in session for validation
+      req.session.canvasOAuthState = state;
       
-      // Return the authorization URL as JSON instead of redirecting
-      res.json({ authUrl });
+      res.redirect(authUrl);
     } catch (error) {
       console.error('Canvas OAuth authorization error:', error);
       res.status(500).json({ message: 'Failed to start Canvas authorization' });
     }
   });
 
-  // Canvas OAuth callback - original path
-  app.get('/api/canvas/oauth/callback', async (req: Request, res: Response) => {
+  app.get('/api/canvas/oauth/callback', requireAuth, async (req: Request, res: Response) => {
     try {
       const { code, state } = req.query;
+      const user = (req as AuthenticatedRequest).user;
       
-      if (!code) {
-        return res.redirect('/?canvas_auth=error&message=no_code');
+      // Validate state parameter
+      if (state !== req.session.canvasOAuthState) {
+        return res.status(400).json({ message: 'Invalid state parameter' });
       }
       
       // Exchange code for tokens
-      console.log('Exchanging Canvas OAuth code for tokens...');
       const tokenResponse = await canvasOAuth.exchangeCodeForToken(code as string);
-      console.log('Token exchange successful, expires_in:', tokenResponse.expires_in);
       
-      // Store tokens in database for the default user (user ID 4 from logs)
-      // In a production setup, you'd validate the state and associate with the proper user
-      const defaultUserId = 4; // Using the user ID from the logs
-      const storedToken = await canvasOAuth.storeTokens(defaultUserId, tokenResponse);
+      // Store tokens in database
+      await canvasOAuth.storeTokens(user.id, tokenResponse);
       
-      console.log('Canvas OAuth tokens stored successfully for user:', defaultUserId, 'expires at:', storedToken.expiresAt);
+      // Clear state from session
+      delete req.session.canvasOAuthState;
       
-      res.redirect('/?canvas_auth=success&message=oauth_configured');
+      res.redirect('/?canvas_auth=success');
     } catch (error) {
       console.error('Canvas OAuth callback error:', error);
-      res.redirect('/?canvas_auth=error&message=token_exchange_failed');
+      res.redirect('/?canvas_auth=error');
     }
   });
 
