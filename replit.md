@@ -6,6 +6,16 @@ This is a full-stack web application for creating Canvas course shells through a
 
 ## Recent Changes
 
+**July 18, 2025**
+- **OKTA SSO INTEGRATION**: Complete Okta SSO authentication system integrated with Digital Promise
+- **DUAL AUTHENTICATION**: Both Okta SSO and simple authentication working in parallel
+- **COOKIE SESSIONS**: Okta authentication using secure cookie-based session management
+- **AUTHENTICATION MIDDLEWARE**: Updated middleware supports both authentication methods seamlessly
+- **LOGIN INTERFACE**: Updated login page with both Okta and simple auth options
+- **CANVAS API TOKEN**: Canvas API working with personal access token fallback system
+- **ENVIRONMENT CONFIGURED**: Okta domain, client ID, and secrets properly configured
+- **PRODUCTION READY**: Full authentication system ready for EC2 deployment to shell.dpvils.org
+
 **July 17, 2025**
 - **CANVAS OAUTH COMPLETE**: Full Canvas OAuth 2.0 integration working end-to-end
 - **TOKEN STORAGE**: OAuth tokens properly stored in database after authorization
