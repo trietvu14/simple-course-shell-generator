@@ -1,0 +1,16 @@
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]: [dotenv@17.2.0] injecting env (0) from .env (tip: � encrypt with dotenvx: https> Jul 18 01:34:57 ip-172-31-31-157 npx[3759]: /home/ubuntu/canvas-course-generator/server/vite.ts:74
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]:     throw new Error(
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]:           ^
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]: Error: Could not find the build directory: /home/ubuntu/canvas-course-generator/>Jul 18 01:34:57 ip-172-31-31-157 npx[3759]:     at serveStatic (/home/ubuntu/canvas-course-generator/server/vite.ts:74:11)
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]:     at <anonymous> (/home/ubuntu/canvas-course-generator/server/index.ts:60:5)
+Jul 18 01:34:57 ip-172-31-31-157 npx[3759]: Node.js v20.19.3
+Jul 18 01:34:57 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Main process exited, code=exited, status=1/FAI>Jul 18 01:34:57 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 18 01:34:57 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Consumed 3.919s CPU time.
+Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Scheduled restart job, restart counter is at 5.Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator - Fixed Production.
+Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Consumed 3.919s CPU time.
+Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Start request repeated too quickly.
+Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 18 01:35:08 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator - Fixed Production.
+Jul 18 01:35:30 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Start request repeated too quickly.
+Jul 18 01:35:30 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Failed with result 'exit-code'.
+Jul 18 01:35:30 ip-172-31-31-157 systemd[1]: Failed to start Canvas Course Shell Generator - Fixed Production.
