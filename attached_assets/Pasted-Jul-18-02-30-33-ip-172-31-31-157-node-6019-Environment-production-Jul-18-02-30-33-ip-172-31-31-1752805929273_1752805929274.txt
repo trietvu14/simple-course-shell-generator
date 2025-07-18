@@ -1,0 +1,14 @@
+Jul 18 02:30:33 ip-172-31-31-157 node[6019]: ✓ Environment: production
+Jul 18 02:30:33 ip-172-31-31-157 node[6019]: ✓ HTML served from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:30:33 ip-172-31-31-157 node[6019]: ✓ JS bundle served from: /home/ubuntu/canvas-course-generator/dist
+Jul 18 02:30:33 ip-172-31-31-157 node[6019]: ✓ Started at: 2025-07-18T02:30:33.625Z
+Jul 18 02:30:43 ip-172-31-31-157 node[6019]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:30:43 ip-172-31-31-157 node[6019]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:30:50 ip-172-31-31-157 systemd[1]: Stopping Canvas Course Shell Generator - React Production...
+Jul 18 02:30:50 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Deactivated successfully.
+Jul 18 02:30:50 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator - React Production.
+Jul 18 02:30:50 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator - React Production.
+Jul 18 02:30:50 ip-172-31-31-157 node[6047]: ✓ Canvas Course Shell Generator running on port 5000
+Jul 18 02:30:50 ip-172-31-31-157 node[6047]: ✓ Environment: production
+Jul 18 02:30:50 ip-172-31-31-157 node[6047]: ✓ HTML served from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:30:50 ip-172-31-31-157 node[6047]: ✓ JS bundle served from: /home/ubuntu/canvas-course-generator/dist
+Jul 18 02:30:50 ip-172-31-31-157 node[6047]: ✓ Started at: 2025-07-18T02:30:50.581Z
+Jul 18 02:31:00 ip-172-31-31-157 node[6047]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:31:00 ip-172-31-31-157 node[6047]: Error: ENOENT: no such file or directory, stat '/home/ubuntu/canvas-course-gene>Jul 18 02:31:00 ip-172-31-31-157 node[6047]: Error: ENOENT: no such file or directory, stat '/home/ubuntu/canvas-course-gene>Jul 18 02:31:00 ip-172-31-31-157 node[6047]: Serving index.html from: /home/ubuntu/canvas-course-generator/dist/public/index>Jul 18 02:31:24 ip-172-31-31-157 node[6047]: Error: ENOENT: no such file or directory, stat '/home/ubuntu/canvas-course-gene>lines 1-20/20 (END)
