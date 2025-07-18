@@ -1,0 +1,17 @@
+Jul 18 02:48:57 ip-172-31-31-157 node[6643]: 2025-07-18T02:48:57.334Z - GET /health
+Jul 18 02:48:57 ip-172-31-31-157 node[6643]: 2025-07-18T02:48:57.346Z - GET /
+Jul 18 02:48:57 ip-172-31-31-157 node[6643]: 2025-07-18T02:48:57.358Z - GET /callback
+Jul 18 02:48:57 ip-172-31-31-157 node[6643]: Serving React app from: /home/ubuntu/canvas-course-generator/dist/public/index.>Jul 18 02:48:57 ip-172-31-31-157 node[6643]: 2025-07-18T02:48:57.426Z - GET /
+Jul 18 02:51:06 ip-172-31-31-157 systemd[1]: Stopping Canvas Course Shell Generator - React Production...
+Jul 18 02:51:06 ip-172-31-31-157 systemd[1]: canvas-course-generator.service: Deactivated successfully.
+Jul 18 02:51:06 ip-172-31-31-157 systemd[1]: Stopped Canvas Course Shell Generator - React Production.
+Jul 18 02:51:06 ip-172-31-31-157 systemd[1]: Started Canvas Course Shell Generator - React Production.
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: Serving static files from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: ✓ Canvas Course Shell Generator running on port 5000
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: ✓ Environment: production
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: ✓ Serving React app from: /home/ubuntu/canvas-course-generator/dist/public
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: ✓ Okta callback URL: /callback
+Jul 18 02:51:06 ip-172-31-31-157 node[6681]: ✓ Started at: 2025-07-18T02:51:06.221Z
+Jul 18 02:51:10 ip-172-31-31-157 node[6681]: 2025-07-18T02:51:10.737Z - GET /callback?iss=https%3A%2F%2Fdigitalpromise.okta.>Jul 18 02:51:10 ip-172-31-31-157 node[6681]: Serving React app from: /home/ubuntu/canvas-course-generator/dist/public/index.>Jul 18 02:51:10 ip-172-31-31-157 node[6681]: 2025-07-18T02:51:10.807Z - GET /assets/index-DLNgVKnK.css
+Jul 18 02:51:10 ip-172-31-31-157 node[6681]: 2025-07-18T02:51:10.809Z - GET /assets/index-BtXm5uTy.js
+Jul 18 02:51:19 ip-172-31-31-157 node[6681]: 2025-07-18T02:51:19.431Z - GET /assets/index-DLNgVKnK.css
