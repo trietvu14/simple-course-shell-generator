@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { useSimpleAuth } from "@/lib/simple-auth-context";
+import { LogIn } from "lucide-react";
 import canvasLogo from "@assets/Canvas_logo_single_mark_1752601762771.png";
 
 export default function SimpleLogin() {
@@ -60,6 +61,28 @@ export default function SimpleLogin() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Okta Login Option */}
+          <div className="mb-6">
+            <Button
+              onClick={() => window.location.href = '/api/okta/login'}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              size="lg"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign in with Okta
+            </Button>
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or use simple auth</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -79,7 +102,7 @@ export default function SimpleLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="P@ssword01"
+                placeholder="DPVils25!"
                 required
               />
             </div>
@@ -87,14 +110,15 @@ export default function SimpleLogin() {
               type="submit" 
               className="w-full"
               disabled={isLoading}
+              variant="outline"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Signing in..." : "Sign in with Simple Auth"}
             </Button>
           </form>
           <div className="mt-4 text-sm text-gray-600 text-center">
             <p>Test credentials:</p>
             <p>Username: admin</p>
-            <p>Password: P@ssword01</p>
+            <p>Password: DPVils25!</p>
           </div>
         </CardContent>
       </Card>

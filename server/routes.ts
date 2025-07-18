@@ -6,6 +6,8 @@ import { insertCreationBatchSchema, type User } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { healthCheck } from "./health";
 import { CanvasOAuthManager } from "./canvas-oauth";
+import oktaRoutes from "./okta-routes";
+import { oktaSSO } from "./okta-auth";
 
 // Initialize Canvas OAuth manager with storage instance
 const canvasOAuth = new CanvasOAuthManager(storage);
@@ -188,6 +190,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get('/health', healthCheck);
   
+  // Add Okta authentication routes
+  app.use('/api/okta', oktaRoutes);
+  
+  // Main callback route (matches Okta app configuration)
+  app.get('/callback', async (req: Request, res: Response) => {
+    const { code, state, error } = req.query;
+
+    if (error) {
+      console.error('Okta callback error:', error);
+      return res.redirect('/?error=auth_failed');
+    }
+
+    if (!code) {
+      console.error('No authorization code received');
+      return res.redirect('/?error=no_code');
+    }
+
+    try {
+      // Exchange code for tokens
+      const tokens = await oktaSSO.exchangeCodeForTokens(code as string);
+      if (!tokens) {
+        console.error('Failed to exchange code for tokens');
+        return res.redirect('/?error=token_exchange_failed');
+      }
+
+      // Verify ID token and get user claims
+      const userClaims = await oktaSSO.verifyIdToken(tokens.id_token);
+      if (!userClaims) {
+        console.error('Failed to verify ID token');
+        return res.redirect('/?error=token_verification_failed');
+      }
+
+      // Create or update user in database
+      const user = await storage.upsertUser({
+        oktaId: userClaims.sub,
+        email: userClaims.email,
+        firstName: userClaims.name.split(' ')[0] || 'Unknown',
+        lastName: userClaims.name.split(' ').slice(1).join(' ') || 'User'
+      });
+
+      // Create session token
+      const sessionToken = oktaSSO.createSessionToken(userClaims);
+
+      // Set secure cookie
+      res.cookie('okta_session', sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 8 * 60 * 60 * 1000 // 8 hours
+      });
+
+      console.log('User authenticated successfully:', userClaims.email);
+      res.redirect('/');
+
+    } catch (error) {
+      console.error('Okta callback processing error:', error);
+      res.redirect('/?error=auth_processing_failed');
+    }
+  });
+  
   // Test endpoint to check Canvas API
   app.get('/api/test/canvas', async (req, res) => {
     try {
@@ -292,17 +354,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint
+  // Get current user endpoint - supports both Simple Auth and Okta
   app.get('/api/auth/user', async (req: Request, res: Response) => {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
-    }
-    
-    const token = authHeader.substring(7);
-    
     try {
+      // Try Okta authentication first
+      const oktaSession = req.cookies.okta_session;
+      if (oktaSession) {
+        const userClaims = oktaSSO.verifySessionToken(oktaSession);
+        if (userClaims) {
+          // Get or create user in database
+          let user = await storage.getUserByOktaId(userClaims.sub);
+          if (!user) {
+            user = await storage.upsertUser({
+              oktaId: userClaims.sub,
+              email: userClaims.email,
+              firstName: userClaims.name.split(' ')[0] || 'Unknown',
+              lastName: userClaims.name.split(' ').slice(1).join(' ') || 'User'
+            });
+          }
+          return res.json({
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            oktaId: user.oktaId
+          });
+        }
+      }
+
+      // Fall back to simple auth
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'No token provided' });
+      }
+      
+      const token = authHeader.substring(7);
+      
       const session = await storage.getUserSessionByToken(token);
       
       if (!session || session.expiresAt < new Date()) {
@@ -327,17 +415,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentication middleware - requires Bearer token
+  // Authentication middleware - supports both Simple Auth and Okta
   const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    
-    const token = authHeader.substring(7);
-    
     try {
+      // Try Okta authentication first
+      const oktaSession = req.cookies.okta_session;
+      if (oktaSession) {
+        const userClaims = oktaSSO.verifySessionToken(oktaSession);
+        if (userClaims) {
+          // Get or create user in database
+          let user = await storage.getUserByOktaId(userClaims.sub);
+          if (!user) {
+            user = await storage.upsertUser({
+              oktaId: userClaims.sub,
+              email: userClaims.email,
+              firstName: userClaims.name.split(' ')[0] || 'Unknown',
+              lastName: userClaims.name.split(' ').slice(1).join(' ') || 'User'
+            });
+          }
+          (req as AuthenticatedRequest).user = user;
+          return next();
+        }
+      }
+
+      // Fall back to simple auth
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
+      const token = authHeader.substring(7);
+      
       const session = await storage.getUserSessionByToken(token);
       
       if (!session || session.expiresAt < new Date()) {
